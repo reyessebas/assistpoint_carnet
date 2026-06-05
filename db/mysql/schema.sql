@@ -1,0 +1,52 @@
+-- Assist Point MySQL schema
+-- Run with: mysql -u <user> -p < db/mysql/schema.sql
+
+CREATE DATABASE IF NOT EXISTS assist_point
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE assist_point;
+
+CREATE TABLE IF NOT EXISTS people (
+  id INT NOT NULL AUTO_INCREMENT,
+  fullName VARCHAR(160) NOT NULL,
+  email VARCHAR(200) NOT NULL,
+  department VARCHAR(120) NOT NULL,
+  role VARCHAR(160) NOT NULL,
+  site VARCHAR(80) NOT NULL DEFAULT 'Colina',
+  status VARCHAR(40) NOT NULL DEFAULT 'Activo',
+  mode VARCHAR(40) NOT NULL DEFAULT 'Presencial',
+  avatar LONGTEXT NOT NULL,
+  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY ux_people_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT NOT NULL AUTO_INCREMENT,
+  email VARCHAR(200) NOT NULL,
+  passwordHash VARCHAR(255) NOT NULL,
+  role VARCHAR(40) NOT NULL DEFAULT 'admin',
+  isActive TINYINT(1) NOT NULL DEFAULT 1,
+  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY ux_users_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  userId INT NOT NULL,
+  tokenHash VARCHAR(255) NOT NULL,
+  expiresAt DATETIME NOT NULL,
+  revokedAt DATETIME NULL,
+  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY ux_refresh_token_hash (tokenHash),
+  KEY ix_refresh_user_id (userId),
+  CONSTRAINT fk_refresh_tokens_user
+    FOREIGN KEY (userId)
+    REFERENCES users(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

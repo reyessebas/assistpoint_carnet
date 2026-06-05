@@ -1,0 +1,72 @@
+[
+  {
+    "id": 7,
+    "fullName": "Test User",
+    "email": "test@example.com",
+    "department": "TI",
+    "role": "Dev",
+    "status": "Activo",
+    "mode": "Presencial",
+    "avatar": "img/carnet.png"
+  },
+  {
+    "id": 1,
+    "fullName": "John Doe",
+    "email": "john.doe@assistpoint.com",
+    "department": "Tecnología",
+    "role": "Desarrollador Front End",
+    "status": "Activo",
+    "mode": "Híbrido",
+    "avatar": "img/1.png"
+  },
+  {
+    "id": 2,
+    "fullName": "María Pérez",
+    "email": "maria.perez@assistpoint.com",
+    "department": "Recursos Humanos",
+    "role": "Analista de talento",
+    "status": "Activo",
+    "mode": "Presencial",
+    "avatar": "img/2.png"
+  },
+  {
+    "id": 3,
+    "fullName": "Camilo Rojas",
+    "email": "camilo.rojas@assistpoint.com",
+    "department": "Operaciones",
+    "role": "Coordinador logístico",
+    "status": "Vacaciones",
+    "mode": "Remoto",
+    "avatar": "img/carnet.png"
+  },
+  {
+    "id": 4,
+    "fullName": "Laura Gómez",
+    "email": "laura.gomez@assistpoint.com",
+    "department": "Finanzas",
+    "role": "Auxiliar contable",
+    "status": "Activo",
+    "mode": "Presencial",
+    "avatar": "img/1.png"
+  },
+  {
+    "id": 5,
+    "fullName": "Santiago Ruiz",
+    "email": "santiago.ruiz@assistpoint.com",
+    "department": "Comercial",
+    "role": "Ejecutivo comercial",
+    "status": "Inactivo",
+    "mode": "Híbrido",
+    "avatar": "img/2.png"
+  },
+  {
+    "id": 6,
+    "fullName": "Paula Méndez",
+    "email": "paula.mendez@assistpoint.com",
+    "department": "Tecnología",
+    "role": "QA Analyst",
+    "status": "Activo",
+    "mode": "Remoto",
+    "avatar": "img/carnet.png"
+  }
+]

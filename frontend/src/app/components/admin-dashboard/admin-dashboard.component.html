@@ -1,0 +1,278 @@
+<div class="dashboard-wrapper">
+
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="dashboard-header__brand">
+      <img src="/img/Curvas_Azul.png" alt="Logo" class="dashboard-header__logo">
+      <h1 class="dashboard-header__title">ASSIST POINT</h1>
+    </div>
+    <div class="dashboard-header__actions">
+      <span>Administrador</span>
+      <button class="action-button" [matMenuTriggerFor]="profileMenu" matTooltip="Menú de usuario">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+      <mat-menu #profileMenu="matMenu">
+        <button mat-menu-item disabled>
+          <mat-icon>person</mat-icon>
+          <span>Administrador</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Cerrar sesión</span>
+        </button>
+      </mat-menu>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="dashboard-content">
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card stat-card--total">
+        <div class="stat-card__icon">
+          <mat-icon>group</mat-icon>
+        </div>
+        <div class="stat-card__body">
+          <span class="stat-card__label">Total Personas</span>
+          <strong class="stat-card__value">{{ stats.total }}</strong>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--active">
+        <div class="stat-card__icon">
+          <mat-icon>verified</mat-icon>
+        </div>
+        <div class="stat-card__body">
+          <span class="stat-card__label">Activos</span>
+          <strong class="stat-card__value">{{ stats.active }}</strong>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--dept">
+        <div class="stat-card__icon">
+          <mat-icon>corporate_fare</mat-icon>
+        </div>
+        <div class="stat-card__body">
+          <span class="stat-card__label">Áreas</span>
+          <strong class="stat-card__value">{{ stats.departments }}</strong>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--remote">
+        <div class="stat-card__icon">
+          <mat-icon>location_on</mat-icon>
+        </div>
+        <div class="stat-card__body">
+          <span class="stat-card__label">Sedes</span>
+          <strong class="stat-card__value">{{ stats.sites }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Banner -->
+    <div *ngIf="error" role="alert" style="background: #ffebee; color: #c62828; padding: 16px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+      <button style="border: none; background: none; cursor: pointer; color: inherit; margin-left: auto;" (click)="error = ''">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+      <input
+        type="text"
+        class="filter-input"
+        placeholder="🔍 Buscar persona"
+        [(ngModel)]="search"
+        (input)="applyFilter()">
+
+      <select class="filter-select" [(ngModel)]="filterDepartment" (change)="applyFilter()">
+        <option value="">Todas las áreas</option>
+        <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+      </select>
+
+      <select class="filter-select" [(ngModel)]="filterSite" (change)="applyFilter()">
+        <option value="">Todas las sedes</option>
+        <option *ngFor="let site of sites" [value]="site">{{ site }}</option>
+      </select>
+
+      <select class="filter-select" [(ngModel)]="filterStatus" (change)="applyFilter()">
+        <option value="">Todos los estados</option>
+        <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+      </select>
+
+      <button
+        *ngIf="hasActiveFilters"
+        class="action-button"
+        (click)="clearFilters()"
+        matTooltip="Limpiar filtros">
+        <mat-icon>clear</mat-icon>
+      </button>
+
+      <div style="flex: 1;"></div>
+
+      <button
+        class="action-button"
+        (click)="toggleSort()"
+        matTooltip="{{ sortNewestFirst ? 'Ordenar: más antiguos' : 'Ordenar: más recientes' }}">
+        <mat-icon>{{ sortNewestFirst ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+      </button>
+
+      <button
+        class="action-button"
+        [class.active]="viewMode === 'carnets'"
+        (click)="toggleViewMode()"
+        matTooltip="{{ viewMode === 'list' ? 'Ver carnets' : 'Ver lista' }}">
+        <mat-icon>{{ viewMode === 'list' ? 'id_card' : 'list' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container" *ngIf="viewMode === 'list'">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 50px;">Avatar</th>
+            <th>Persona</th>
+            <th>Área</th>
+            <th>Sede</th>
+            <th>Estado</th>
+            <th>Modalidad</th>
+            <th style="width: 120px; text-align: center;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody *ngIf="dataSource.data.length > 0; else emptyState">
+          <tr *ngFor="let person of dataSource.data; trackBy: trackById">
+            <td>
+              <div *ngIf="person.avatar; else initials"
+                   [style.backgroundImage]="'url(' + resolveAvatar(person) + ')'"
+                   class="table-avatar"></div>
+              <ng-template #initials>
+                <div class="table-avatar table-avatar--placeholder">
+                  {{ avatarInitials(person.fullName) }}
+                </div>
+              </ng-template>
+            </td>
+            <td>
+              <div style="font-weight: 600;">{{ person.fullName }}</div>
+              <div style="font-size: 0.85rem; color: #757575;">{{ person.role }}</div>
+            </td>
+            <td>{{ person.department }}</td>
+            <td>
+              <div class="site-badge">
+                <mat-icon>location_on</mat-icon>
+                {{ person.site || 'Colina' }}
+              </div>
+            </td>
+            <td>
+              <span
+                class="badge"
+                [class.badge--active]="person.status === 'Activo'"
+                [class.badge--inactive]="person.status === 'Inactivo'"
+                [class.badge--vacation]="person.status === 'Vacaciones'">
+                {{ person.status }}
+              </span>
+            </td>
+            <td>
+              <div class="mode-badge">
+                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">
+                  {{ modeIcon(person.mode) }}
+                </mat-icon>
+                {{ person.mode }}
+              </div>
+            </td>
+            <td class="actions-cell">
+              <button class="action-button" (click)="viewCard(person)" matTooltip="Ver carnet">
+                <mat-icon>badge</mat-icon>
+              </button>
+              <button class="action-button" (click)="openPersonDialog(person)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="action-button action-button--delete" (click)="deletePerson(person)" matTooltip="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <div class="empty-state__icon">🔍</div>
+          <h3 class="empty-state__title">No se encontraron personas</h3>
+          <p>Intenta ajustar los filtros o agrega una nueva persona</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Carnet Preview Grid -->
+    <div class="carnets-grid-container" *ngIf="viewMode === 'carnets'">
+      <div *ngIf="filteredPeopleForCarnets.length > 0; else emptyStateCarnets" class="carnets-grid">
+        <div *ngFor="let person of filteredPeopleForCarnets; trackBy: trackById" class="carnet-preview-wrapper">
+          <div class="carnet-preview">
+            <!-- Header -->
+            <div class="carnet-preview__header">
+              <img src="/img/Curvas_Azul.png" alt="Logo" class="carnet-preview__logo">
+              <div class="carnet-preview__header-text">ASSIST<br>POINT</div>
+            </div>
+
+            <!-- Photo -->
+            <div class="carnet-preview__photo-frame">
+              <img class="carnet-preview__photo" [src]="resolveAvatar(person)" [alt]="person.fullName">
+              <span class="carnet-preview__status" [ngClass]="'status-' + statusClassCard(person.status)">
+                {{ person.status }}
+              </span>
+            </div>
+
+            <!-- Name & Role -->
+            <h3 class="carnet-preview__name">{{ person.fullName }}</h3>
+            <p class="carnet-preview__role">{{ person.role }}</p>
+
+            <!-- Details -->
+            <div class="carnet-preview__details">
+              <div class="carnet-preview__detail">{{ person.department }}</div>
+              <div class="carnet-preview__detail">{{ person.site || 'Colina' }}</div>
+              <div class="carnet-preview__detail">{{ person.mode }}</div>
+            </div>
+
+            <!-- Footer -->
+            <div class="carnet-preview__footer">
+              ID: {{ person.id }}
+            </div>
+          </div>
+
+          <!-- Actions overlay -->
+          <div class="carnet-preview-actions">
+            <button class="carnet-action-button" (click)="viewCard(person)" matTooltip="Ver carnet completo">
+              <mat-icon>fullscreen</mat-icon>
+            </button>
+            <button class="carnet-action-button" (click)="openPersonDialog(person)" matTooltip="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button class="carnet-action-button carnet-action-button--delete" (click)="deletePerson(person)" matTooltip="Eliminar">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #emptyStateCarnets>
+        <div class="empty-state">
+          <div class="empty-state__icon">📋</div>
+          <h3 class="empty-state__title">No se encontraron carnets</h3>
+          <p>Intenta ajustar los filtros o agrega una nueva persona</p>
+        </div>
+      </ng-template>
+    </div>
+
+  </div>
+
+  <!-- FAB Button -->
+  <button class="fab-button" (click)="openPersonDialog()" matTooltip="Agregar persona">
+    <mat-icon>add</mat-icon>
+  </button>
+
+</div>

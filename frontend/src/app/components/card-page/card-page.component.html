@@ -1,0 +1,88 @@
+<div class="card-page-wrapper">
+
+  <!-- Action Buttons (no imprimen) -->
+  <div class="card-actions no-print">
+    <button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Volver
+    </button>
+    <button *ngIf="person" (click)="printCard()">
+      <mat-icon>print</mat-icon>
+      Imprimir
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="state-container no-print" *ngIf="loading">
+    <mat-spinner diameter="48" [color]="'primary'"></mat-spinner>
+    <p>Cargando carnet...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="state-container no-print" *ngIf="!loading && !person">
+    <mat-icon class="state-icon">error_outline</mat-icon>
+    <p>{{ error || 'No se encontró el carnet solicitado.' }}</p>
+    <button (click)="goBack()">Volver al panel</button>
+  </div>
+
+  <!-- Corporate ID Card (Vertical) -->
+  <div class="id-card" *ngIf="person && !loading">
+
+    <!-- Header -->
+    <div class="id-card__header">
+      <img src="/img/Curvas_Azul.png" alt="Logo" class="id-card__logo">
+      <div class="id-card__header-text">ASSIST POINT<br>Carnet Corporativo</div>
+    </div>
+
+    <!-- Body -->
+    <div class="id-card__body">
+
+      <!-- Photo -->
+      <div class="id-card__photo-frame">
+        <img class="id-card__photo" [src]="resolveAvatar()" [alt]="person.fullName">
+        <span class="id-card__status" [ngClass]="statusClass(person.status)">
+          {{ person.status }}
+        </span>
+      </div>
+
+      <!-- Name & Role -->
+      <h2 class="id-card__name">{{ person.fullName }}</h2>
+      <p class="id-card__role">{{ person.role }}</p>
+
+      <!-- Divider -->
+      <div class="id-card__divider"></div>
+
+      <!-- Details -->
+      <div class="id-card__details">
+        <div class="id-card__detail">
+          <mat-icon>corporate_fare</mat-icon>
+          <span>{{ person.department }}</span>
+        </div>
+        <div class="id-card__detail">
+          <mat-icon>location_on</mat-icon>
+          <span>{{ person.site || 'Colina' }}</span>
+        </div>
+        <div class="id-card__detail">
+          <mat-icon>email</mat-icon>
+          <span>{{ person.email }}</span>
+        </div>
+        <div class="id-card__detail">
+          <mat-icon>{{ modeIcon(person.mode) }}</mat-icon>
+          <span>{{ person.mode }}</span>
+        </div>
+      </div>
+
+      <!-- QR -->
+      <img class="id-card__qr" [src]="qrUrl" [alt]="'QR ' + person.fullName">
+      <small class="id-card__qr-label">Escanear para validar</small>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="id-card__footer">
+      Assist Point &copy; {{ currentYear }} &bull; ID: {{ formattedId }}
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,156 @@
+.dialog-title {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  color: #1a237e;
+  font-size: 1.25rem !important;
+  padding-bottom: 0 !important;
+}
+
+.dialog-content {
+  padding: 8px 24px 0 !important;
+  min-width: 640px;
+  max-height: 72vh;
+  overflow-y: auto;
+}
+
+.dialog-subtitle {
+  margin: 4px 0 16px;
+  color: #757575;
+  font-size: 0.9rem;
+}
+
+.dialog-divider {
+  margin-bottom: 20px;
+}
+
+.form-section-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #1565c0;
+  margin-bottom: 12px;
+  margin-top: 4px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+  margin-bottom: 8px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.photo-uploader {
+  display: grid;
+  grid-template-columns: 104px 1fr;
+  gap: 18px;
+  align-items: center;
+  padding: 16px;
+  margin-bottom: 8px;
+  border: 1px solid #dfe6f1;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.photo-uploader__preview {
+  width: 104px;
+  height: 104px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid #1565c0;
+  background: #eef3f9;
+  box-shadow: 0 8px 18px rgba(21, 101, 192, 0.14);
+}
+
+.photo-uploader__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-uploader__body {
+  min-width: 0;
+}
+
+.photo-uploader__title {
+  color: #0b2436;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.photo-uploader__body p {
+  color: #607286;
+  font-size: 0.86rem;
+  line-height: 1.35;
+  margin: 0 0 12px;
+}
+
+.photo-uploader__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.photo-uploader__actions button {
+  min-height: 36px;
+}
+
+.photo-uploader__input {
+  display: none;
+}
+
+.photo-uploader__hint,
+.photo-uploader__error {
+  display: block;
+  font-size: 0.78rem;
+}
+
+.photo-uploader__hint {
+  color: #6b7c8f;
+}
+
+.photo-uploader__error {
+  color: #c62828;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.dialog-actions {
+  padding: 12px 24px 20px !important;
+  gap: 12px;
+}
+
+.dialog-actions button {
+  min-width: 120px;
+}
+
+@media (max-width: 600px) {
+  .dialog-content {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .photo-uploader {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .photo-uploader__actions {
+    justify-content: center;
+  }
+}

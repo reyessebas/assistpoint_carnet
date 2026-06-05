@@ -1,0 +1,36 @@
+{
+  "name": "assist-point",
+  "version": "1.0.0",
+  "description": "Sistema de carnetización y administración de personas - Assist Point",
+  "type": "commonjs",
+  "main": "src/server/index.js",
+  "scripts": {
+    "start": "node src/server/index.js",
+    "dev": "NODE_ENV=development node src/server/index.js",
+    "backend:start": "node src/server/index.js",
+    "backend:dev": "NODE_ENV=development node src/server/index.js",
+    "debug": "DEBUG=true node src/server/index.js",
+    "frontend:start": "cd frontend && npm start",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:install": "cd frontend && npm install",
+    "start:prod": "SERVE_FRONTEND=true NODE_ENV=production node src/server/index.js",
+    "start:unified": "npm run frontend:build && SERVE_FRONTEND=true NODE_ENV=production node src/server/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "carnet",
+    "administración",
+    "empleados",
+    "qr"
+  ],
+  "author": "Your Organization",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.13.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "mysql2": "^3.11.3",
+    "sqlite3": "^5.1.6"
+  }
+}
