@@ -399,3 +399,4 @@ Para MySQL, el esquema base actualizado está en `db/mysql/schema.sql`. El model
 **Versión**: 1.0.0  
 **Última actualización**: Mayo 2026
 # assistpointcarnet
+# assistpoint_carnet
