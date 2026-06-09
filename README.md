@@ -394,3 +394,4 @@ Para MySQL, el esquema base actualizado está en `db/mysql/schema.sql`. El model
 # assistpointcarnet
 # assistpoint_carnet
 # assistpoint_carnet
+# assistpoint_carnett
