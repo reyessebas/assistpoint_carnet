@@ -11,7 +11,7 @@ Sistema profesional fullstack para la administración y carnetización de person
 - ✅ **Filtros Avanzados**: Por departamento, estado y búsqueda de texto
 - ✅ **Vistas Múltiples**: Vista en lista y grid
 - ✅ **Estadísticas**: Panel de métricas de la empresa
-- ✅ **Persistencia**: Datos en JSON (extensible a bases de datos)
+- ✅ **Persistencia**: Datos centralizados en MySQL
 - ✅ **API RESTful**: Endpoints para integración con otros sistemas
 
 ## 🏗️ Arquitectura del Proyecto
@@ -22,7 +22,7 @@ assist-point/
 │   ├── server/
 │   │   ├── index.js                 # Punto de entrada del servidor
 │   │   ├── models/
-│   │   │   └── PeopleModel.js       # Modelo de datos
+│   │   │   └── MySqlPeopleModel.js  # Modelo de datos MySQL
 │   │   ├── controllers/
 │   │   │   └── PeopleController.js  # Lógica de negocio
 │   │   ├── routes/
@@ -38,21 +38,9 @@ assist-point/
 ├── frontend/
 │   └── App Angular standalone para login, panel y carnet
 ├── public/
-│   ├── index.html                   # Página de login
-│   ├── admin.html                   # Panel de administración
-│   ├── card.html                    # Visualización de carnet
-│   ├── css/
-│   │   ├── global.css              # Estilos globales
-│   │   ├── styleguide.css          # Guía de estilos
-│   │   └── style.css               # Estilos específicos de la aplicación
-│   ├── js/
-│   │   ├── login.js                # Lógica de autenticación
-│   │   ├── admin.js                # Lógica del panel admin
-│   │   └── card.js                 # Lógica del carnet
-│   └── img/
-│       └── (Imágenes de la aplicación)
-├── data/
-│   └── people.json                  # Base de datos de personas (JSON)
+│   └── img/                         # Imágenes públicas de la aplicación
+├── db/
+│   └── mysql/schema.sql             # Esquema base de MySQL
 ├── config/
 │   └── environment.js               # Configuración centralizada
 ├── .env.example                     # Ejemplo de variables de entorno
@@ -201,8 +189,13 @@ DELETE /api/people/:id
 PORT=3000
 NODE_ENV=development
 
-# Datos
-DATA_DIR=./data
+# MySQL
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=
+MYSQL_DATABASE=assist_point
+MYSQL_CONNECTION_LIMIT=10
 
 # CORS
 CORS_ORIGINS=http://localhost:3000
@@ -315,9 +308,9 @@ openssl req -x509 -newkey rsa:4096 -nodes -keyout certs/key.pem -out certs/cert.
   -subj "/CN=localhost"
 ```
 
-2. Ejecutar el servidor con HTTPS y SQLite (ejemplo):
+2. Ejecutar el servidor con HTTPS y MySQL (ejemplo):
 ```bash
-USE_HTTPS=true TLS_KEY_PATH=./certs/key.pem TLS_CERT_PATH=./certs/cert.pem DATA_DB=sqlite npm run dev
+USE_HTTPS=true TLS_KEY_PATH=./certs/key.pem TLS_CERT_PATH=./certs/cert.pem npm run dev
 ```
 
 3. Petición de ejemplo con `curl` aceptando gzip (nota: `-k` permite certificados auto-firmados):
@@ -350,7 +343,7 @@ El sistema separa persona y carnet. Cada persona puede tener varios carnets, per
 
 Variables relevantes:
 - `PUBLIC_APP_URL`, `FRONTEND_URL` o `APP_URL`: base pública usada para construir el QR seguro (`/validar-carnet/:token`).
-- `DATA_DB`: `json`, `sqlite` o `mysql`.
+- `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`: conexión principal de datos.
 
 Endpoints principales:
 - `GET /api/catalogs`: catálogos de áreas, cargos, sedes, modalidades, tipos y estados.
@@ -399,4 +392,5 @@ Para MySQL, el esquema base actualizado está en `db/mysql/schema.sql`. El model
 **Versión**: 1.0.0  
 **Última actualización**: Mayo 2026
 # assistpointcarnet
+# assistpoint_carnet
 # assistpoint_carnet
