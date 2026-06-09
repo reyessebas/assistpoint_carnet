@@ -104,10 +104,7 @@ assist-point/
 
   El frontend Angular consume la API del backend en `http://localhost:3000/api`.
 
-### Credenciales por Defecto
 
-- **Email**: `admin@assistpoint.co`
-- **Password**: `Admin123`
 
 ## 📚 Documentación de API
 
@@ -190,7 +187,7 @@ DELETE /api/people/:id
   email: string,           // Correo electrónico (requerido)
   department: string,      // Departamento (requerido)
   role: string,            // Puesto/Cargo (requerido)
-  status: string,          // Activo | Inactivo | Vacaciones
+  status: string,          // Activo | Inactivo | Retirado | Suspendido
   mode: string,            // Presencial | Remoto | Híbrido
   avatar: string           // URL a imagen de perfil
 }
@@ -347,6 +344,58 @@ Notas:
 - Gzip se aplica automáticamente si el cliente envía `Accept-Encoding: gzip`.
 - Para producción usa certificados válidos (Let's Encrypt) y un proxy (Nginx) o CDN.
 
+## Carnetización digital
+
+El sistema separa persona y carnet. Cada persona puede tener varios carnets, pero el backend mantiene un carnet `Vigente` activo por persona; al generar uno nuevo, el anterior pasa a `Reemplazado`.
+
+Variables relevantes:
+- `PUBLIC_APP_URL`, `FRONTEND_URL` o `APP_URL`: base pública usada para construir el QR seguro (`/validar-carnet/:token`).
+- `DATA_DB`: `json`, `sqlite` o `mysql`.
+
+Endpoints principales:
+- `GET /api/catalogs`: catálogos de áreas, cargos, sedes, modalidades, tipos y estados.
+- `POST /api/catalogs/areas`, `/api/catalogs/cargos`, `/api/catalogs/sedes`: crea nuevos catálogos administrables (requiere token).
+- `GET /api/people/export`: exporta personas y carnet vigente en CSV (requiere token).
+- `POST /api/people/import`: importa personas en lote y genera carnets automáticamente (requiere token).
+- `POST /api/people/:id/carnets`: genera un nuevo carnet vigente (requiere token).
+- `POST /api/people/:id/carnets/deliver`: marca el carnet vigente como entregado digitalmente (requiere token).
+- `GET /api/carnets/validate/:token`: validación pública del QR.
+
+La validación pública no expone el documento completo; muestra documento enmascarado y valida tanto `estado_persona` como `estado_carnet`.
+
+Desde el panel administrativo puedes agregar áreas, cargos y sedes con los botones de catálogo. Al abrir el formulario de persona, los selects consultan `/api/catalogs`, así que los nuevos valores aparecen automáticamente.
+
+La gestión de catálogos permite listar, agregar, editar y eliminar áreas, cargos y sedes. El backend evita duplicados y bloquea eliminación cuando el elemento está asociado a personas existentes.
+
+Para carga masiva desde Excel, exporta la hoja como CSV y súbela desde el botón de importación. Formato requerido:
+
+```text
+EMPLEADO ID | NOMBRE | DOCUMENTO | FECHA. INGRESO | AREA | CARGO | CELULAR | EMAIL | SEDE | ESTADO
+```
+
+Notas de importación:
+- Se toleran espacios extra y diferencias de mayúsculas/minúsculas en encabezados.
+- `EMPLEADO ID` se guarda como `employeeCode`.
+- `ACTIVO`, `Activo` y `activo` se normalizan a `Activo`; `INACTIVO`, `Inactivo` e `inactivo` se normalizan a `Inactivo`.
+- Si área, cargo o sede no existen, se crean automáticamente.
+- Si ya existe una persona por `EMPLEADO ID` o `DOCUMENTO`, se actualiza en lugar de duplicarse.
+- El resumen muestra creados, actualizados y registros con error.
+
+Descarga de carnets:
+- El panel permite seleccionar empleados activos y descargar solo los seleccionados.
+- También permite descargar todos los activos que coinciden con filtros de sede y área.
+- La descarga se genera como HTML empresarial autocontenido con estilos inline, pensado para abrirse/guardarse de forma estable en navegadores modernos.
+- El código de empleado se muestra como metadata debajo del carnet, no dentro del diseño principal.
+
+Seguridad reforzada:
+- Rutas administrativas requieren token y rol `admin` cuando el token lo declara.
+- La importación valida tipo y tamaño de archivo en frontend.
+- Backend valida email, fecha, celular, estados, modalidad, tipo de persona y campos obligatorios.
+- Los catálogos usan consultas parametrizadas en MySQL/SQLite y evitan eliminación insegura.
+
+Para MySQL, el esquema base actualizado está en `db/mysql/schema.sql`. El modelo MySQL también intenta crear/ajustar columnas y tablas necesarias al iniciar, pero en producción conviene ejecutar el SQL con control de cambios y revisar duplicados antes de crear índices únicos por `documentNumber`, `email` y `employeeCode`.
+
 
 **Versión**: 1.0.0  
 **Última actualización**: Mayo 2026
+# assistpointcarnet
