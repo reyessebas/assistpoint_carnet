@@ -1,146 +1,210 @@
-<h2 mat-dialog-title class="dialog-title">
-  <mat-icon>{{ isEdit ? 'edit' : 'person_add' }}</mat-icon>
-  <span>{{ isEdit ? 'Actualizar persona' : 'Nueva persona' }}</span>
-</h2>
+<header class="dialog-hero">
+  <div class="dialog-hero__brand">
+    <img src="/img/Curvas_Azul.png" alt="Assist Point">
+    <span>ASSIST POINT</span>
+  </div>
+
+  <div class="dialog-hero__content">
+    <div class="dialog-hero__mark">
+      <mat-icon>{{ isEdit ? 'edit' : 'person_add' }}</mat-icon>
+    </div>
+    <div class="dialog-hero__copy">
+      <span class="dialog-hero__eyebrow">Administración de personas</span>
+      <h2>{{ isEdit ? 'Actualizar persona' : 'Nueva persona' }}</h2>
+      <p>{{ isEdit ? 'Modifica el registro y la información del carnet.' : 'Registra los datos necesarios para emitir el carnet.' }}</p>
+    </div>
+  </div>
+</header>
 
 <mat-dialog-content [formGroup]="form" class="dialog-content">
-  <p class="dialog-subtitle">
-    {{ isEdit ? 'Modifica la información del carnet corporativo.' : 'Completa la información para generar el carnet.' }}
-  </p>
-
-  <mat-divider class="dialog-divider"></mat-divider>
-
-  <div class="form-section-label">Información personal</div>
-
-  <div class="form-grid">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Nombre completo</mat-label>
-      <mat-icon matPrefix>person</mat-icon>
-      <input matInput formControlName="fullName" placeholder="Andrea Torres" required>
-      <mat-error *ngIf="form.get('fullName')?.hasError('required')">El nombre es requerido</mat-error>
-      <mat-error *ngIf="form.get('fullName')?.hasError('maxlength')">Máximo 255 caracteres</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Correo electrónico</mat-label>
-      <mat-icon matPrefix>email</mat-icon>
-      <input matInput type="email" formControlName="email" placeholder="correo@assistpoint.co" required>
-      <mat-error *ngIf="form.get('email')?.hasError('required')">El correo es requerido</mat-error>
-      <mat-error *ngIf="form.get('email')?.hasError('email')">Ingresa un correo válido</mat-error>
-    </mat-form-field>
-  </div>
-
-  <div class="form-section-label">Información laboral</div>
-
-  <div class="form-grid">
-    <mat-form-field appearance="outline">
-      <mat-label>Área Assist Point</mat-label>
-      <mat-icon matPrefix>corporate_fare</mat-icon>
-      <mat-select formControlName="department" required>
-        <mat-option value="">Selecciona un área</mat-option>
-        <mat-option *ngFor="let department of departments" [value]="department">
-          {{ department }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="form.get('department')?.hasError('required')">El área es requerida</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Cargo Assist Point</mat-label>
-      <mat-icon matPrefix>work</mat-icon>
-      <mat-select formControlName="role" required>
-        <mat-option value="">Selecciona un cargo</mat-option>
-        <mat-option *ngFor="let role of roles" [value]="role">
-          {{ role }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="form.get('role')?.hasError('required')">El cargo es requerido</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Sede</mat-label>
-      <mat-icon matPrefix>location_on</mat-icon>
-      <mat-select formControlName="site" required>
-        <mat-option *ngFor="let site of sites" [value]="site">
-          {{ site }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="form.get('site')?.hasError('required')">La sede es requerida</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Estado</mat-label>
-      <mat-select formControlName="status">
-        <mat-option value="Activo">
-          <mat-icon style="color:#2e7d32;font-size:18px">check_circle</mat-icon> Activo
-        </mat-option>
-        <mat-option value="Inactivo">
-          <mat-icon style="color:#c62828;font-size:18px">cancel</mat-icon> Inactivo
-        </mat-option>
-        <mat-option value="Vacaciones">
-          <mat-icon style="color:#f57f17;font-size:18px">beach_access</mat-icon> Vacaciones
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Modalidad</mat-label>
-      <mat-select formControlName="mode">
-        <mat-option value="Presencial">
-          <mat-icon style="font-size:18px">business</mat-icon> Presencial
-        </mat-option>
-        <mat-option value="Remoto">
-          <mat-icon style="font-size:18px">laptop</mat-icon> Remoto
-        </mat-option>
-        <mat-option value="Híbrido">
-          <mat-icon style="font-size:18px">sync_alt</mat-icon> Híbrido
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-  </div>
-
-  <div class="form-section-label">Foto del carnet</div>
-
-  <div class="photo-uploader">
-    <div class="photo-uploader__preview">
-      <img [src]="photoPreview || 'img/carnet.png'" alt="Vista previa de la foto">
+  <section class="form-section form-section--card">
+    <div class="form-section__header">
+      <div>
+        <span>Información personal</span>
+        <p>Datos básicos para identificar y contactar a la persona.</p>
+      </div>
     </div>
 
-    <div class="photo-uploader__body">
-      <div class="photo-uploader__title">Foto para el carnet</div>
-      <p>Sube una imagen desde tu computador o conserva la foto predeterminada.</p>
+    <div class="form-grid">
+      <mat-form-field appearance="fill">
+        <mat-label>Nombre completo</mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input matInput formControlName="fullName" placeholder="Andrea Torres" required>
+        <mat-error *ngIf="form.get('fullName')?.hasError('required')">El nombre es requerido</mat-error>
+        <mat-error *ngIf="form.get('fullName')?.hasError('maxlength')">Máximo 255 caracteres</mat-error>
+      </mat-form-field>
 
-      <div class="photo-uploader__actions">
-        <input
-          #photoInput
-          type="file"
-          accept="image/*"
-          class="photo-uploader__input"
-          (change)="onPhotoSelected($event)">
+      <mat-form-field appearance="fill">
+        <mat-label>Correo electrónico</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input matInput type="email" formControlName="email" placeholder="correo@assistpoint.co" required>
+        <mat-error *ngIf="form.get('email')?.hasError('required')">El correo es requerido</mat-error>
+        <mat-error *ngIf="form.get('email')?.hasError('email')">Ingresa un correo válido</mat-error>
+      </mat-form-field>
 
-        <button mat-stroked-button type="button" (click)="photoInput.click()">
-          <mat-icon>upload</mat-icon>
-          Subir foto
-        </button>
+      <mat-form-field appearance="fill">
+        <mat-label>Número de documento</mat-label>
+        <mat-icon matPrefix>badge</mat-icon>
+        <input matInput formControlName="documentNumber" placeholder="1023456789" required>
+        <mat-error *ngIf="form.get('documentNumber')?.hasError('required')">El documento es requerido</mat-error>
+        <mat-error *ngIf="form.get('documentNumber')?.hasError('maxlength')">Máximo 80 caracteres</mat-error>
+      </mat-form-field>
 
-        <button mat-button type="button" (click)="clearPhoto()">
-          <mat-icon>restart_alt</mat-icon>
-          Predeterminada
-        </button>
+      <mat-form-field appearance="fill">
+        <mat-label>Teléfono</mat-label>
+        <mat-icon matPrefix>phone</mat-icon>
+        <input matInput formControlName="phone" placeholder="+57 300 000 0000">
+      </mat-form-field>
+    </div>
+  </section>
+
+  <section class="form-section form-section--card">
+    <div class="form-section__header">
+      <div>
+        <span>Información laboral</span>
+        <p>Define la ubicación, cargo y condiciones del carnet corporativo.</p>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <mat-form-field appearance="fill">
+        <mat-label>Área Assist Point</mat-label>
+        <mat-icon matPrefix>corporate_fare</mat-icon>
+        <mat-select formControlName="department" required>
+          <mat-option value="">Selecciona un área</mat-option>
+          <mat-option *ngFor="let department of departments" [value]="department">
+            {{ department }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('department')?.hasError('required')">El área es requerida</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Cargo Assist Point</mat-label>
+        <mat-icon matPrefix>work</mat-icon>
+        <mat-select formControlName="role" required>
+          <mat-option value="">Selecciona un cargo</mat-option>
+          <mat-option *ngFor="let role of roles" [value]="role">
+            {{ role }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('role')?.hasError('required')">El cargo es requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Sede</mat-label>
+        <mat-icon matPrefix>location_on</mat-icon>
+        <mat-select formControlName="site" required>
+          <mat-option *ngFor="let site of sites" [value]="site">
+            {{ site }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('site')?.hasError('required')">La sede es requerida</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Modalidad</mat-label>
+        <mat-select formControlName="mode">
+          <mat-option *ngFor="let mode of modes" [value]="mode">
+            {{ mode }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Tipo de persona</mat-label>
+        <mat-icon matPrefix>groups</mat-icon>
+        <mat-select formControlName="personType">
+          <mat-option *ngFor="let type of personTypes" [value]="type">
+            {{ type }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="status">
+          <mat-option *ngFor="let status of personStatuses" [value]="status">
+            {{ status }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+    </div>
+  </section>
+
+  <section class="form-section form-section--card">
+    <div class="form-section__header">
+      <div>
+        <span>Identificación interna</span>
+        <p>Códigos y fechas operativas para control administrativo.</p>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <mat-form-field appearance="fill">
+        <mat-label>Código empleado</mat-label>
+        <mat-icon matPrefix>tag</mat-icon>
+        <input matInput formControlName="employeeCode" placeholder="AP-001">
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Fecha de ingreso</mat-label>
+        <mat-icon matPrefix>event</mat-icon>
+        <input matInput type="date" formControlName="startDate">
+      </mat-form-field>
+    </div>
+  </section>
+
+  <section class="form-section form-section--card">
+    <div class="form-section__header">
+      <div>
+        <span>Foto del carnet</span>
+        <p>Imagen que se usará como avatar en el carnet corporativo.</p>
+      </div>
+    </div>
+
+    <div class="photo-uploader">
+      <div class="photo-uploader__preview">
+        <img [src]="photoPreview || 'img/defecto_perfil.jpeg'" alt="Vista previa de la foto">
       </div>
 
-      <span class="photo-uploader__hint">JPG, PNG o WEBP. Máximo 3 MB.</span>
-      <span class="photo-uploader__error" *ngIf="fileError">{{ fileError }}</span>
+      <div class="photo-uploader__body">
+        <div class="photo-uploader__title">Foto para el carnet</div>
+        <p>Sube una imagen desde tu computador o conserva la foto predeterminada.</p>
+
+        <div class="photo-uploader__actions">
+          <input
+            #photoInput
+            type="file"
+            accept="image/*"
+            class="photo-uploader__input"
+            (change)="onPhotoSelected($event)">
+
+          <button mat-stroked-button type="button" (click)="photoInput.click()">
+            <mat-icon>upload</mat-icon>
+            Subir foto
+          </button>
+
+          <button mat-button type="button" (click)="clearPhoto()">
+            <mat-icon>restart_alt</mat-icon>
+            Predeterminada
+          </button>
+        </div>
+
+        <span class="photo-uploader__hint">JPG, PNG o WEBP. Máximo 3 MB.</span>
+        <span class="photo-uploader__error" *ngIf="fileError">{{ fileError }}</span>
+      </div>
     </div>
-  </div>
+  </section>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="dialog-actions">
-  <button mat-stroked-button type="button" (click)="cancel()">
+  <button mat-button class="dialog-actions__secondary" type="button" (click)="cancel()">
     <mat-icon>close</mat-icon>
     Cancelar
   </button>
-  <button mat-raised-button color="primary" type="button" (click)="save()">
+  <button mat-flat-button class="dialog-actions__primary" type="button" (click)="save()">
     <mat-icon>{{ isEdit ? 'save' : 'person_add' }}</mat-icon>
     {{ isEdit ? 'Actualizar' : 'Guardar persona' }}
   </button>

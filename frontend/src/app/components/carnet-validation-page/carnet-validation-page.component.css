@@ -1,0 +1,232 @@
+:host {
+  --blue: #1f5aa6;
+  --navy: #07131f;
+  --navy-2: #10263f;
+  --green: #2e7d32;
+  --red: #c62828;
+  --border: #d9e1ec;
+  --text: #101827;
+  --muted: #667085;
+  --soft: #f5f8fc;
+}
+
+.validation-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 36px 16px;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(7, 19, 31, 0.34), transparent 34%),
+    linear-gradient(145deg, #07131f 0%, #123a63 54%, #2a70c6 100%);
+}
+
+.validation-panel {
+  width: min(760px, 100%);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(3, 12, 24, 0.28);
+  color: var(--text);
+}
+
+.brand-header {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  align-items: center;
+  gap: 18px;
+  min-height: 96px;
+  padding: 22px 34px;
+  background: linear-gradient(140deg, var(--navy) 0%, var(--navy-2) 58%, var(--blue) 100%);
+  color: #ffffff;
+}
+
+.brand-logo {
+  width: 68px;
+  height: 48px;
+  justify-self: center;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.brand-header strong {
+  display: block;
+  font-size: 1.02rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+}
+
+.brand-header span {
+  display: block;
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.validation-panel > mat-spinner,
+.validation-panel > p {
+  margin: 28px auto;
+}
+
+.validation-panel > p {
+  color: var(--muted);
+  text-align: center;
+}
+
+.status-summary {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  align-items: center;
+  gap: 18px;
+  margin: 28px 34px 20px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--soft);
+}
+
+.status-summary--valid {
+  border-color: rgba(46, 125, 50, 0.28);
+  background: #f4fbf5;
+}
+
+.status-summary--invalid {
+  border-color: rgba(198, 40, 40, 0.28);
+  background: #fff7f7;
+}
+
+.validation-icon {
+  width: 46px;
+  height: 46px;
+  font-size: 46px;
+}
+
+.status-summary--valid .validation-icon { color: var(--green); }
+.status-summary--invalid .validation-icon { color: var(--red); }
+
+h1 {
+  margin: 0 0 5px;
+  font-size: 1.55rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.validation-reason,
+.status-summary p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.person-card {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  align-items: center;
+  gap: 18px;
+  margin: 0 34px 20px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.person-card img {
+  width: 78px;
+  height: 78px;
+  border: 3px solid var(--blue);
+  border-radius: 50%;
+  background: #edf2f7;
+  object-fit: cover;
+}
+
+.person-card h2 {
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 1.18rem;
+  line-height: 1.2;
+}
+
+.person-card p {
+  margin: 0 0 7px;
+  color: var(--blue);
+  font-weight: 780;
+}
+
+.person-card span {
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.validation-details {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 0 34px 34px;
+}
+
+.validation-details div {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 13px 16px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+dt {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.98rem;
+  font-weight: 780;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 620px) {
+  .validation-page { padding: 16px; }
+
+  .brand-header {
+    grid-template-columns: 64px 1fr;
+    padding: 18px;
+  }
+
+  .brand-logo {
+    width: 54px;
+  }
+
+  .status-summary,
+  .person-card,
+  .validation-details {
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+
+  .person-card,
+  .status-summary {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .validation-details {
+    margin-bottom: 22px;
+  }
+
+  .validation-details div {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+}

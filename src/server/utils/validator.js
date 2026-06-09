@@ -2,9 +2,7 @@
  * Simple validation and sanitization utilities for Person data
  */
 
-const allowedStatuses = ['Activo', 'Inactivo', 'Vacaciones'];
-const allowedModes = ['Presencial', 'Remoto', 'Híbrido'];
-const allowedSites = ['Colina', '123', 'Medellin', 'Uruguay'];
+const allowedStatuses = ['Activo', 'Inactivo', 'Retirado', 'Suspendido'];
 
 function sanitizeString(value) {
   if (value == null) return '';
@@ -33,21 +31,68 @@ function isValidUrl(url) {
   }
 }
 
+function normalizeDate(value) {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+    excelEpoch.setUTCDate(excelEpoch.getUTCDate() + value);
+    return excelEpoch.toISOString().slice(0, 10);
+  }
+  const s = sanitizeString(value || '');
+  if (!s) return '';
+  const match = s.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (match) return match[1];
+
+  const slashDate = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+  if (slashDate) {
+    const first = Number(slashDate[1]);
+    const second = Number(slashDate[2]);
+    const year = slashDate[3];
+    const month = second > 12 ? first : second;
+    const day = second > 12 ? second : first;
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+
+  return s;
+}
+
+function isValidDateValue(value) {
+  if (!value) return true;
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+function isValidPhone(value) {
+  if (!value) return true;
+  return /^[0-9+\-\s()]{7,20}$/.test(String(value));
+}
+
 function validatePersonData(input = {}) {
   const errors = [];
+  const normalizedStatus = sanitizeString(input.status || 'Activo') || 'Activo';
   const data = {
     fullName: sanitizeString(input.fullName),
     email: sanitizeString(input.email),
+    documentNumber: sanitizeString(input.documentNumber),
     department: sanitizeString(input.department),
     role: sanitizeString(input.role),
     site: sanitizeString(input.site || 'Colina') || 'Colina',
-    status: sanitizeString(input.status || 'Activo') || 'Activo',
+    status: normalizedStatus === 'Vacaciones' ? 'Suspendido' : normalizedStatus,
     mode: sanitizeString(input.mode || 'Presencial') || 'Presencial',
-    avatar: sanitizeString(input.avatar || 'img/carnet.png') || 'img/carnet.png'
+    personType: sanitizeString(input.personType || 'Empleado') || 'Empleado',
+    employeeCode: sanitizeString(input.employeeCode || ''),
+    phone: sanitizeString(input.phone || ''),
+    startDate: normalizeDate(input.startDate || ''),
+    observations: sanitizeString(input.observations || ''),
+    avatar: sanitizeString(input.avatar || 'img/defecto_perfil.jpeg') || 'img/defecto_perfil.jpeg'
   };
 
   // required fields
-  ['fullName', 'email', 'department', 'role'].forEach((f) => {
+  ['fullName', 'email', 'documentNumber', 'department', 'role'].forEach((f) => {
     if (!data[f]) errors.push(`${f} is required`);
     if (data[f] && data[f].length > 255) errors.push(`${f} must be <= 255 chars`);
   });
@@ -58,17 +103,21 @@ function validatePersonData(input = {}) {
 
   if (!data.department) errors.push('department is required');
   if (!data.role) errors.push('role is required');
+  if (!data.documentNumber) errors.push('documentNumber is required');
   if (!data.site) errors.push('site is required');
-  if (data.site && !allowedSites.includes(data.site)) {
-    errors.push(`site must be one of: ${allowedSites.join(', ')}`);
-  }
-
   if (data.status && !allowedStatuses.includes(data.status)) {
     errors.push(`status must be one of: ${allowedStatuses.join(', ')}`);
   }
 
-  if (data.mode && !allowedModes.includes(data.mode)) {
-    errors.push(`mode must be one of: ${allowedModes.join(', ')}`);
+  if (data.mode && data.mode.length > 80) errors.push('mode must be <= 80 chars');
+  if (data.personType && data.personType.length > 80) errors.push('personType must be <= 80 chars');
+
+  if (!isValidDateValue(data.startDate)) {
+    errors.push('startDate must use YYYY-MM-DD format');
+  }
+
+  if (!isValidPhone(data.phone)) {
+    errors.push('phone has invalid format');
   }
 
   // avatar URL optional but if present should look like URL/path

@@ -26,20 +26,18 @@ class StaticHandler {
       roots.push(publicDir);
     }
 
-    if (this.production) {
-      const frontendCandidates = [
-        path.join(this.rootDir, 'frontend', 'dist', 'frontend'),
-        path.join(this.rootDir, 'frontend', 'dist', 'frontend', 'browser'),
-        path.join(this.rootDir, 'dist', 'frontend'),
-        path.join(this.rootDir, 'dist', 'frontend', 'browser')
-      ];
+    const frontendCandidates = [
+      path.join(this.rootDir, 'frontend', 'dist', 'frontend', 'browser'),
+      path.join(this.rootDir, 'frontend', 'dist', 'frontend'),
+      path.join(this.rootDir, 'dist', 'frontend', 'browser'),
+      path.join(this.rootDir, 'dist', 'frontend')
+    ];
 
-      frontendCandidates.forEach((candidate) => {
-        if (fs.existsSync(candidate)) {
-          roots.unshift(candidate);
-        }
-      });
-    }
+    frontendCandidates.forEach((candidate) => {
+      if (fs.existsSync(candidate)) {
+        roots.unshift(candidate);
+      }
+    });
 
     return roots;
   }

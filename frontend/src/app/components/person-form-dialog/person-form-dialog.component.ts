@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { Person, PersonFormValue } from '../../models/person.model';
+import { PeopleService } from '../../services/people.service';
 
 export interface PersonDialogData {
   person: Person | null;
@@ -33,11 +34,11 @@ export interface PersonDialogData {
   templateUrl: './person-form-dialog.component.html',
   styleUrl: './person-form-dialog.component.css'
 })
-export class PersonFormDialogComponent {
+export class PersonFormDialogComponent implements OnInit {
   form: FormGroup;
   photoPreview = '';
   fileError = '';
-  readonly departments = [
+  departments = [
     'Aprendiz',
     'B2B',
     'Billing',
@@ -58,7 +59,7 @@ export class PersonFormDialogComponent {
     'Recursos Humanos',
     'Servicios Generales'
   ];
-  readonly roles = [
+  roles = [
     'Analista Contable',
     'Analista Contable Senior',
     'Analista Contable y Reporting',
@@ -86,10 +87,14 @@ export class PersonFormDialogComponent {
     'Revenue Cycle',
     'Servicio de Asistencia Remota'
   ];
-  readonly sites = ['Colina', '123', 'Medellin', 'Uruguay'];
+  sites = ['Colina', '123', 'Medellin', 'Uruguay'];
+  modes = ['Presencial', 'Remoto', 'Híbrido'];
+  personTypes = ['Empleado', 'Contratista', 'Visitante', 'Practicante', 'Proveedor'];
+  personStatuses = ['Activo', 'Inactivo', 'Retirado', 'Suspendido'];
 
   constructor(
     private readonly fb: FormBuilder,
+    private readonly peopleService: PeopleService,
     public dialogRef: MatDialogRef<PersonFormDialogComponent, PersonFormValue | null>,
     @Inject(MAT_DIALOG_DATA) public data: PersonDialogData
   ) {
@@ -97,14 +102,33 @@ export class PersonFormDialogComponent {
     this.form = this.fb.group({
       fullName: [p?.fullName ?? '', [Validators.required, Validators.maxLength(255)]],
       email: [p?.email ?? '', [Validators.required, Validators.email, Validators.maxLength(200)]],
+      documentNumber: [p?.documentNumber ?? '', [Validators.required, Validators.maxLength(80)]],
       department: [p?.department ?? '', [Validators.required, Validators.maxLength(120)]],
       role: [p?.role ?? '', [Validators.required, Validators.maxLength(160)]],
       site: [p?.site ?? 'Colina', [Validators.required, Validators.maxLength(80)]],
       status: [p?.status ?? 'Activo', Validators.required],
       mode: [p?.mode ?? 'Presencial', Validators.required],
+      personType: [p?.personType ?? 'Empleado', Validators.required],
+      employeeCode: [p?.employeeCode ?? '', Validators.maxLength(80)],
+      phone: [p?.phone ?? '', Validators.maxLength(60)],
+      startDate: [this.formatDateForInput(p?.startDate) ?? ''],
       avatar: [p?.avatar ?? '']
     });
-    this.photoPreview = p?.avatar ?? 'img/carnet.png';
+    this.photoPreview = p?.avatar ?? 'img/defecto_perfil.jpeg';
+  }
+
+  async ngOnInit(): Promise<void> {
+    try {
+      const catalogs = await this.peopleService.getCatalogs();
+      this.departments = catalogs.areas.filter(item => item.activo).map(item => item.nombre);
+      this.roles = catalogs.cargos.filter(item => item.activo).map(item => item.nombre);
+      this.sites = catalogs.sedes.filter(item => item.activo).map(item => item.nombre);
+      this.modes = catalogs.modalidades.filter(item => item.activo).map(item => item.nombre);
+      this.personTypes = catalogs.tiposPersona.filter(item => item.activo).map(item => item.nombre);
+      this.personStatuses = catalogs.estadosPersona.filter(item => item.activo).map(item => item.nombre);
+    } catch {
+      // Keep local fallbacks when catalogs are unavailable.
+    }
   }
 
   get isEdit(): boolean {
@@ -118,7 +142,7 @@ export class PersonFormDialogComponent {
     }
     const value: PersonFormValue = { ...this.form.value };
     if (!value.avatar?.trim()) {
-      value.avatar = 'img/carnet.png';
+      value.avatar = 'img/defecto_perfil.jpeg';
     }
     this.dialogRef.close(value);
   }
@@ -151,7 +175,7 @@ export class PersonFormDialogComponent {
 
   clearPhoto(): void {
     this.form.patchValue({ avatar: '' });
-    this.photoPreview = 'img/carnet.png';
+    this.photoPreview = 'img/defecto_perfil.jpeg';
     this.fileError = '';
   }
 
@@ -162,6 +186,11 @@ export class PersonFormDialogComponent {
       reader.onerror = () => reject(reader.error);
       reader.readAsDataURL(file);
     });
+  }
+
+  private formatDateForInput(value?: string): string {
+    if (!value) return '';
+    return String(value).slice(0, 10);
   }
 
   cancel(): void {

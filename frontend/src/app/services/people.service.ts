@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { API_BASE_URL } from '../shared/app-urls';
-import { Person, PersonFormValue } from '../models/person.model';
+import { Catalogs, Carnet, CarnetValidation, Person, PersonFormValue } from '../models/person.model';
 import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
@@ -31,6 +31,57 @@ export class PeopleService {
 
   delete(id: number): Promise<void> {
     return firstValueFrom(this.http.delete<void>(`${API_BASE_URL}/people/${id}`, { headers: this.headers(true) }));
+  }
+
+  bulkDelete(ids: number[]): Promise<{ requested: number; deleted: number; deletedIds: number[]; missingIds: number[] }> {
+    return firstValueFrom(this.http.post<{ requested: number; deleted: number; deletedIds: number[]; missingIds: number[] }>(
+      `${API_BASE_URL}/people/bulk-delete`,
+      { ids },
+      { headers: this.headers(true) }
+    ));
+  }
+
+  getCatalogs(): Promise<Catalogs> {
+    return firstValueFrom(this.http.get<Catalogs>(`${API_BASE_URL.replace(/\/$/, '')}/catalogs`, { headers: this.headers() }));
+  }
+
+  createCatalogItem(type: 'areas' | 'cargos' | 'sedes' | 'modalidades' | 'tiposPersona', item: Record<string, unknown>): Promise<unknown> {
+    return firstValueFrom(this.http.post(`${API_BASE_URL.replace(/\/$/, '')}/catalogs/${type}`, item, { headers: this.headers(true) }));
+  }
+
+  updateCatalogItem(type: 'areas' | 'cargos' | 'sedes' | 'modalidades' | 'tiposPersona', id: number, item: Record<string, unknown>): Promise<unknown> {
+    return firstValueFrom(this.http.put(`${API_BASE_URL.replace(/\/$/, '')}/catalogs/${type}/${id}`, item, { headers: this.headers(true) }));
+  }
+
+  deleteCatalogItem(type: 'areas' | 'cargos' | 'sedes' | 'modalidades' | 'tiposPersona', id: number): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`${API_BASE_URL.replace(/\/$/, '')}/catalogs/${type}/${id}`, { headers: this.headers(true) }));
+  }
+
+  exportCsv(): Promise<Blob> {
+    return firstValueFrom(this.http.get(`${API_BASE_URL}/people/export`, {
+      headers: this.headers(true),
+      responseType: 'blob'
+    }));
+  }
+
+  generateCarnet(personId: number): Promise<Carnet> {
+    return firstValueFrom(this.http.post<Carnet>(`${API_BASE_URL}/people/${personId}/carnets`, {}, { headers: this.headers(true) }));
+  }
+
+  markCarnetDelivered(personId: number, method = 'Correo'): Promise<Carnet> {
+    return firstValueFrom(this.http.post<Carnet>(`${API_BASE_URL}/people/${personId}/carnets/deliver`, { metodo_entrega: method }, { headers: this.headers(true) }));
+  }
+
+  validateCarnet(token: string): Promise<CarnetValidation> {
+    return firstValueFrom(this.http.get<CarnetValidation>(`${API_BASE_URL.replace(/\/$/, '')}/carnets/validate/${encodeURIComponent(token)}`));
+  }
+
+  importPeople(people: PersonFormValue[]): Promise<{ created: Person[]; updated: Person[]; skipped: Array<{ documentNumber: string; email: string; error: string }> }> {
+    return firstValueFrom(this.http.post<{ created: Person[]; updated: Person[]; skipped: Array<{ documentNumber: string; email: string; error: string }> }>(
+      `${API_BASE_URL}/people/import`,
+      { people },
+      { headers: this.headers(true) }
+    ));
   }
 
   private headers(requireAuth = false): HttpHeaders {

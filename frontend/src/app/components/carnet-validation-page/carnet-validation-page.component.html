@@ -1,0 +1,98 @@
+<main class="validation-page">
+  <section class="validation-panel" *ngIf="loading">
+    <div class="brand-header">
+      <img src="/img/Curvas_Azul.png" alt="Assist Point" class="brand-logo">
+      <div>
+        <strong>ASSIST POINT</strong>
+        <span>Validación de carnet corporativo</span>
+      </div>
+    </div>
+    <mat-spinner diameter="44"></mat-spinner>
+    <p>Validando carnet digital...</p>
+  </section>
+
+  <section class="validation-panel" *ngIf="!loading && error">
+    <div class="brand-header">
+      <img src="/img/Curvas_Azul.png" alt="Assist Point" class="brand-logo">
+      <div>
+        <strong>ASSIST POINT</strong>
+        <span>Validación de carnet corporativo</span>
+      </div>
+    </div>
+    <div class="status-summary status-summary--invalid">
+      <mat-icon class="validation-icon">error_outline</mat-icon>
+      <div>
+        <h1>Carnet no válido</h1>
+        <p>{{ error }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="validation-panel" *ngIf="!loading && result">
+    <div class="brand-header">
+      <img src="/img/Curvas_Azul.png" alt="Assist Point" class="brand-logo">
+      <div>
+        <strong>ASSIST POINT</strong>
+        <span>Validación de carnet corporativo</span>
+      </div>
+    </div>
+
+    <div class="status-summary" [class.status-summary--valid]="result.valid" [class.status-summary--invalid]="!result.valid">
+      <mat-icon class="validation-icon">
+        {{ result.valid ? 'verified' : 'gpp_bad' }}
+      </mat-icon>
+      <div>
+        <h1>{{ result.valid ? 'Carnet válido' : 'Carnet no válido' }}</h1>
+        <p class="validation-reason">{{ result.reason }}</p>
+      </div>
+    </div>
+
+    <div class="person-card" *ngIf="result.person">
+      <img [src]="resolveAvatar()" [alt]="result.person.fullName">
+      <div>
+        <h2>{{ result.person.fullName }}</h2>
+        <p>{{ result.person.role }}</p>
+        <span>{{ result.person.department }} · {{ result.person.site }}</span>
+      </div>
+    </div>
+
+    <dl class="validation-details" *ngIf="result.person">
+      <div>
+        <dt>Documento</dt>
+        <dd>{{ result.person.documentMasked }}</dd>
+      </div>
+      <div>
+        <dt>Área</dt>
+        <dd>{{ result.person.department }}</dd>
+      </div>
+      <div>
+        <dt>Sede</dt>
+        <dd>{{ result.person.site }}</dd>
+      </div>
+      <div>
+        <dt>Modalidad</dt>
+        <dd>{{ result.person.mode }}</dd>
+      </div>
+      <div>
+        <dt>Tipo</dt>
+        <dd>{{ result.person.personType }}</dd>
+      </div>
+      <div>
+        <dt>Estado persona</dt>
+        <dd>{{ result.person.status }}</dd>
+      </div>
+      <div>
+        <dt>Estado carnet</dt>
+        <dd>{{ result.carnet.estado_carnet }}</dd>
+      </div>
+      <div>
+        <dt>Emisión</dt>
+        <dd>{{ formatDate(result.carnet.fecha_emision) }}</dd>
+      </div>
+      <div>
+        <dt>Vencimiento</dt>
+        <dd>{{ formatDate(result.carnet.fecha_vencimiento) }}</dd>
+      </div>
+    </dl>
+  </section>
+</main>

@@ -108,7 +108,7 @@ function createServer() {
       if (pathname.startsWith('/api/auth')) {
         const authRoutes = new AuthRoutes();
         await authRoutes.route(request, response, pathname);
-      } else if (pathname.startsWith('/api/people')) {
+      } else if (pathname.startsWith('/api/people') || pathname.startsWith('/api/catalogs') || pathname.startsWith('/api/carnets')) {
         await peopleRouter.route(request, response, pathname);
       } else {
         if (staticHandler) {

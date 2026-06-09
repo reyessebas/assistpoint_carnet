@@ -9,7 +9,7 @@ export const ASSET_BASE_URL = '';
 export const STATIC_BASE_URL = ASSET_BASE_URL;
 
 export function resolveAssetUrl(assetPath?: string): string {
-  const fallback = `${ASSET_BASE_URL}/img/carnet.png`;
+  const fallback = `${ASSET_BASE_URL}/img/defecto_perfil.jpeg`;
 
   if (!assetPath) {
     return fallback;

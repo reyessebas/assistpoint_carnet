@@ -16,6 +16,13 @@ a { text-decoration: none; }
 button, input, textarea, select { font: inherit; }
 button:focus-visible { outline: 2px solid #4a90e2; }
 
+.person-dialog-panel .mdc-dialog__surface {
+  border-radius: 18px !important;
+  background: #ffffff !important;
+  box-shadow: 0 22px 70px rgba(13, 24, 44, 0.26) !important;
+  overflow: hidden !important;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; }

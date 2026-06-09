@@ -1,88 +1,132 @@
-<div class="card-page-wrapper">
+<div class="card-page-wrapper" [class.card-page-wrapper--shared]="sharedView">
 
-  <!-- Action Buttons (no imprimen) -->
-  <div class="card-actions no-print">
-    <button (click)="goBack()">
+  <!-- Action Buttons -->
+  <div class="card-actions" *ngIf="!sharedView">
+    <button class="card-actions__back" (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
       Volver
     </button>
-    <button *ngIf="person" (click)="printCard()">
-      <mat-icon>print</mat-icon>
-      Imprimir
+
+    <div class="card-actions__heading">
+      <h1>Acciones del carnet</h1>
+      <p>Gestiona y comparte este carnet digital</p>
+    </div>
+
+    <button class="card-actions__item card-actions__item--primary" *ngIf="person" (click)="downloadCard()">
+      <span class="card-actions__icon"><mat-icon>download</mat-icon></span>
+      <span>
+        <strong>Descargar carnet</strong>
+        <small>Guardar como imagen PNG</small>
+      </span>
+    </button>
+    <button class="card-actions__item" *ngIf="person" (click)="copyCardLink()">
+      <span class="card-actions__icon"><mat-icon>link</mat-icon></span>
+      <span>
+        <strong>Copiar link</strong>
+        <small>Copiar enlace público</small>
+      </span>
+    </button>
+    <button class="card-actions__item" *ngIf="person" (click)="sendByEmail()">
+      <span class="card-actions__icon"><mat-icon>mail</mat-icon></span>
+      <span>
+        <strong>Enviar por correo</strong>
+        <small>Compartir con otra persona</small>
+      </span>
+    </button>
+    <button class="card-actions__item" *ngIf="person" (click)="openValidation()">
+      <span class="card-actions__icon"><mat-icon>qr_code_scanner</mat-icon></span>
+      <span>
+        <strong>Ver validación QR</strong>
+        <small>Abrir página de verificación</small>
+      </span>
     </button>
   </div>
 
   <!-- Loading State -->
-  <div class="state-container no-print" *ngIf="loading">
+  <div class="state-container" *ngIf="loading">
     <mat-spinner diameter="48" [color]="'primary'"></mat-spinner>
     <p>Cargando carnet...</p>
   </div>
 
   <!-- Error State -->
-  <div class="state-container no-print" *ngIf="!loading && !person">
+  <div class="state-container" *ngIf="!loading && !person">
     <mat-icon class="state-icon">error_outline</mat-icon>
     <p>{{ error || 'No se encontró el carnet solicitado.' }}</p>
-    <button (click)="goBack()">Volver al panel</button>
+    <button *ngIf="!sharedView" (click)="goBack()">Volver al panel</button>
   </div>
 
-  <!-- Corporate ID Card (Vertical) -->
+  <!-- Corporate ID Card (Single side) -->
   <div class="id-card" *ngIf="person && !loading">
+    <div class="id-card__pattern"></div>
 
-    <!-- Header -->
     <div class="id-card__header">
       <img src="/img/Curvas_Azul.png" alt="Logo" class="id-card__logo">
-      <div class="id-card__header-text">ASSIST POINT<br>Carnet Corporativo</div>
+      <div class="id-card__header-text">
+        <strong>ASSIST POINT</strong>
+        <span>Carnet corporativo</span>
+      </div>
     </div>
 
-    <!-- Body -->
     <div class="id-card__body">
-
-      <!-- Photo -->
-      <div class="id-card__photo-frame">
-        <img class="id-card__photo" [src]="resolveAvatar()" [alt]="person.fullName">
-        <span class="id-card__status" [ngClass]="statusClass(person.status)">
-          {{ person.status }}
-        </span>
-      </div>
-
-      <!-- Name & Role -->
-      <h2 class="id-card__name">{{ person.fullName }}</h2>
-      <p class="id-card__role">{{ person.role }}</p>
-
-      <!-- Divider -->
-      <div class="id-card__divider"></div>
-
-      <!-- Details -->
-      <div class="id-card__details">
-        <div class="id-card__detail">
-          <mat-icon>corporate_fare</mat-icon>
-          <span>{{ person.department }}</span>
-        </div>
-        <div class="id-card__detail">
-          <mat-icon>location_on</mat-icon>
-          <span>{{ person.site || 'Colina' }}</span>
-        </div>
-        <div class="id-card__detail">
-          <mat-icon>email</mat-icon>
-          <span>{{ person.email }}</span>
-        </div>
-        <div class="id-card__detail">
-          <mat-icon>{{ modeIcon(person.mode) }}</mat-icon>
-          <span>{{ person.mode }}</span>
+      <div class="id-card__identity">
+        <div class="id-card__photo-frame">
+          <img class="id-card__photo" [src]="resolveAvatar()" [alt]="person.fullName">
+          <span class="id-card__status" [ngClass]="statusClass(person.status)">
+            {{ person.status }}
+          </span>
         </div>
       </div>
 
-      <!-- QR -->
-      <img class="id-card__qr" [src]="qrUrl" [alt]="'QR ' + person.fullName">
-      <small class="id-card__qr-label">Escanear para validar</small>
+      <section class="id-card__person">
+        <h2 class="id-card__name">{{ person.fullName }}</h2>
+        <p class="id-card__role">{{ person.role }}</p>
+      </section>
 
+      <div class="id-card__content">
+        <div class="id-card__details">
+          <div>
+            <mat-icon>corporate_fare</mat-icon>
+            <span>Área:</span>
+            <strong>{{ person.department }}</strong>
+          </div>
+          <div>
+            <mat-icon>badge</mat-icon>
+            <span>Documento:</span>
+            <strong>{{ person.documentNumber }}</strong>
+          </div>
+          <div>
+            <mat-icon>email</mat-icon>
+            <span>Correo:</span>
+            <strong>{{ person.email }}</strong>
+          </div>
+          <div>
+            <mat-icon>location_on</mat-icon>
+            <span>Sede:</span>
+            <strong>{{ person.site || 'Colina' }}</strong>
+          </div>
+          <div>
+            <mat-icon>{{ modeIcon(person.mode) }}</mat-icon>
+            <span>Modalidad:</span>
+            <strong>{{ person.mode }}</strong>
+          </div>
+          <div>
+            <mat-icon>groups</mat-icon>
+            <span>Tipo:</span>
+            <strong>{{ person.personType || 'Empleado' }}</strong>
+          </div>
+        </div>
+
+        <div class="id-card__validation">
+          <img class="id-card__qr" [src]="qrUrl" [alt]="'QR ' + person.fullName">
+          <small>Escanear para validar</small>
+        </div>
+      </div>
     </div>
 
-    <!-- Footer -->
     <div class="id-card__footer">
-      Assist Point &copy; {{ currentYear }} &bull; ID: {{ formattedId }}
+      <span>Assist Point &copy; {{ currentYear }} · Carnet digital</span>
+      <strong>Código empleado: {{ person.employeeCode || 'No asignado' }}</strong>
     </div>
-
   </div>
 
 </div>

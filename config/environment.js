@@ -15,6 +15,7 @@ const MYSQL_PASSWORD = process.env.MYSQL_PASSWORD || '';
 const MYSQL_DATABASE = process.env.MYSQL_DATABASE || 'assist_point';
 const JWT_SECRET = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || DEFAULT_ADMIN_PASSWORD;
+const PUBLIC_APP_URL = process.env.PUBLIC_APP_URL || process.env.FRONTEND_URL || process.env.APP_URL || `http://localhost:${process.env.PORT || 3000}`;
 
 function assertProductionSafety() {
   if (NODE_ENV !== 'production') {
@@ -70,6 +71,7 @@ module.exports = {
   
   // API
   API_PREFIX: '/api',
+  PUBLIC_APP_URL,
   // Serve Angular/static frontend from backend (false for separated architecture)
   SERVE_FRONTEND: process.env.SERVE_FRONTEND === 'true' || false,
   

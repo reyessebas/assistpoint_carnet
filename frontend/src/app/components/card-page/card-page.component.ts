@@ -6,6 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Person } from '../../models/person.model';
 import { PeopleService } from '../../services/people.service';
 import { resolveAssetUrl } from '../../shared/app-urls';
+import { createCarnetCanvas, downloadCanvasPng, drawCarnetToCanvas } from '../../shared/carnet-canvas';
 
 @Component({
   selector: 'app-card-page',
@@ -22,6 +23,7 @@ export class CardPageComponent implements OnInit {
   person: Person | null = null;
   loading = true;
   error = '';
+  sharedView = false;
   readonly currentYear = new Date().getFullYear();
 
   constructor(
@@ -32,6 +34,7 @@ export class CardPageComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.sharedView = this.route.snapshot.queryParamMap.get('shared') === '1';
     if (!id) {
       void this.router.navigate(['/login']);
       return;
@@ -47,19 +50,59 @@ export class CardPageComponent implements OnInit {
 
   get qrUrl(): string {
     if (!this.person) return '';
-    const currentUrl = `${window.location.origin}/card/${this.person.id}`;
+    const currentUrl = this.validationUrl;
     return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(currentUrl)}`;
+  }
+
+  get validationUrl(): string {
+    const token = this.person?.activeCarnet?.qr_token;
+    return token ? `${window.location.origin}/validar-carnet/${token}` : `${window.location.origin}/validar-carnet/no-token`;
+  }
+
+  get cardUrl(): string {
+    return this.person ? `${window.location.origin}/card/${this.person.id}?shared=1` : window.location.href;
   }
 
   resolveAvatar(): string {
     return resolveAssetUrl(this.person?.avatar);
   }
 
-  printCard(): void {
-    window.print();
+  openValidation(): void {
+    window.open(this.validationUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  async copyCardLink(): Promise<void> {
+    if (!this.person) return;
+    try {
+      await navigator.clipboard.writeText(this.cardUrl);
+    } catch {
+      const input = document.createElement('input');
+      input.value = this.cardUrl;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      input.remove();
+    }
+  }
+
+  async sendByEmail(): Promise<void> {
+    if (!this.person) return;
+    await this.peopleService.markCarnetDelivered(this.person.id, 'Correo');
+    const subject = encodeURIComponent('Carnet digital Assist Point');
+    const body = encodeURIComponent(`Hola ${this.person.fullName},\n\nPuedes consultar y validar tu carnet digital en:\n${this.validationUrl}`);
+    window.location.href = `mailto:${this.person.email}?subject=${subject}&body=${body}`;
+  }
+
+  async downloadCard(): Promise<void> {
+    if (!this.person) return;
+    const { canvas, ctx } = createCarnetCanvas();
+    if (!ctx) return;
+    await drawCarnetToCanvas(ctx, this.person, { cardUrl: this.cardUrl, validationUrl: this.validationUrl });
+    downloadCanvasPng(canvas, `carnet-${this.person.employeeCode || this.person.documentNumber || this.person.id}`);
   }
 
   goBack(): void {
+    if (this.sharedView) return;
     void this.router.navigate(['/admin']);
   }
 
@@ -69,7 +112,7 @@ export class CardPageComponent implements OnInit {
 
   statusClass(status: string): string {
     if (status === 'Activo') return 'status--active';
-    if (status === 'Vacaciones') return 'status--vacation';
+    if (status === 'Suspendido') return 'status--vacation';
     return 'status--inactive';
   }
 
