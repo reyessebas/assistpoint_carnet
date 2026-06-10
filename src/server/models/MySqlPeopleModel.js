@@ -108,7 +108,7 @@ class MySqlPeopleModel {
   }
 
   publicCardUrl(token) {
-    return `${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/public-card/${encodeURIComponent(token)}`;
+    return `${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/card/${encodeURIComponent(token)}`;
   }
 
   async ensureCatalogsSchema() {
@@ -265,8 +265,8 @@ class MySqlPeopleModel {
     }
 
     await this.pool.execute(
-      "UPDATE carnets SET qr_url = CONCAT(?, qr_token), updated_at = NOW() WHERE qr_token IS NOT NULL AND qr_token <> '' AND (qr_url IS NULL OR qr_url = '' OR qr_url NOT LIKE '%/public-card/%')",
-      [`${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/public-card/`]
+      "UPDATE carnets SET qr_url = CONCAT(?, qr_token), updated_at = NOW() WHERE qr_token IS NOT NULL AND qr_token <> '' AND (qr_url IS NULL OR qr_url = '' OR qr_url NOT LIKE '%/card/%')",
+      [`${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/card/`]
     );
 
     await this.addUniqueIndexIfMissing('carnets', 'ux_carnets_token', 'qr_token');

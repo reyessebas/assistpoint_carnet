@@ -10,7 +10,7 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
   { path: 'login', component: LoginPageComponent },
   { path: 'admin', component: AdminDashboardComponent, canActivate: [authGuard] },
-  { path: 'card/:id', component: CardPageComponent, canActivate: [authGuard] },
+  { path: 'card/:token', component: CardPageComponent },
   { path: 'public-card/:token', component: CardPageComponent },
   { path: 'validar-carnet/:token', component: CarnetValidationPageComponent },
   { path: '**', redirectTo: 'login' }

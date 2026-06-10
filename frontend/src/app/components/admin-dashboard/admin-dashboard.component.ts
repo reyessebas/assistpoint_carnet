@@ -445,7 +445,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   cardUrlFor(person: Person): string {
-    return person.activeCarnet?.qr_token ? `${window.location.origin}/public-card/${person.activeCarnet.qr_token}` : '';
+    return person.activeCarnet?.qr_token ? `${window.location.origin}/card/${person.activeCarnet.qr_token}` : '';
   }
 
   async copyCardLink(person: Person): Promise<void> {
@@ -638,7 +638,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   viewCard(person: Person): void {
-    void this.router.navigate(['/card', person.id]);
+    const token = person.activeCarnet?.qr_token;
+    if (!token) {
+      this.showError('Esta persona no tiene un token público de carnet disponible.');
+      return;
+    }
+    void this.router.navigate(['/card', token]);
   }
 
   logout(): void {

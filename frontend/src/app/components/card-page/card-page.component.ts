@@ -36,31 +36,17 @@ export class CardPageComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     const token = this.route.snapshot.paramMap.get('token')?.trim() || '';
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.sharedView = Boolean(token) || this.route.snapshot.queryParamMap.get('shared') === '1';
-    if (token) {
-      if (!SHARE_TOKEN_PATTERN.test(token)) {
-        this.error = 'No se encontró el carnet solicitado.';
-        this.loading = false;
-        return;
-      }
-      try {
-        this.person = await this.peopleService.getPublicCard(token);
-      } catch {
-        this.error = 'No se encontró el carnet solicitado.';
-      } finally {
-        this.loading = false;
-      }
+    this.sharedView = true;
+    if (!SHARE_TOKEN_PATTERN.test(token)) {
+      this.error = 'No se encontró el carnet solicitado.';
+      this.loading = false;
       return;
     }
-    if (!id) {
-      void this.router.navigate(['/login']);
-      return;
-    }
+
     try {
-      this.person = await this.peopleService.getById(id);
+      this.person = await this.peopleService.getPublicCard(token);
     } catch {
-      this.error = 'No se encontró la persona solicitada.';
+      this.error = 'No se encontró el carnet solicitado.';
     } finally {
       this.loading = false;
     }
@@ -79,7 +65,7 @@ export class CardPageComponent implements OnInit {
 
   get cardUrl(): string {
     const token = this.person?.activeCarnet?.qr_token;
-    return token ? `${window.location.origin}/public-card/${token}` : window.location.href;
+    return token ? `${window.location.origin}/card/${token}` : window.location.href;
   }
 
   resolveAvatar(): string {
