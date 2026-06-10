@@ -72,6 +72,11 @@ async function initializeMySqlAuth() {
       'INSERT INTO users (email, passwordHash, role, isActive) VALUES (?, ?, ?, 1)',
       [config.ADMIN_EMAIL, hashPassword(config.ADMIN_PASSWORD), 'admin']
     );
+  } else {
+    await db.execute(
+      'UPDATE users SET passwordHash = ? WHERE email = ?',
+      [hashPassword(config.ADMIN_PASSWORD), config.ADMIN_EMAIL]
+    );
   }
 }
 
