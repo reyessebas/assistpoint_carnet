@@ -78,9 +78,20 @@ class PeopleRouter {
       await this.controller.validateCarnet(request, response, validationMatch[1]);
       return;
     }
+
+    const publicCardMatch = pathname.match(/^\/api\/carnets\/share\/([A-Za-z0-9._:-]+)$/);
+    if (method === 'GET' && publicCardMatch) {
+      await this.controller.getPublicCard(request, response, publicCardMatch[1]);
+      return;
+    }
     
     // GET /api/people
     if (method === 'GET' && pathname === '/api/people') {
+      try {
+        requireAuth();
+      } catch (err) {
+        return responseHandler.unauthorized(response, 'Unauthorized', request);
+      }
       await this.controller.getAll(request, response);
       return;
     }
@@ -104,6 +115,11 @@ class PeopleRouter {
     // GET /api/people/:id
     if (method === 'GET' && personIdMatch) {
       const personId = Number(personIdMatch[1]);
+      try {
+        requireAuth();
+      } catch (err) {
+        return responseHandler.unauthorized(response, 'Unauthorized', request);
+      }
       await this.controller.getById(request, response, personId);
       return;
     }

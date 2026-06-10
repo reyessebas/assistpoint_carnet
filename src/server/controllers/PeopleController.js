@@ -7,6 +7,8 @@ const responseHandler = require('../utils/responseHandler');
 const logger = require('../utils/logger');
 const { validatePersonData } = require('../utils/validator');
 
+const SHARE_TOKEN_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{15,119}$/;
+
 class PeopleController {
   constructor(peopleModel) {
     this.model = peopleModel;
@@ -249,7 +251,12 @@ class PeopleController {
 
   async validateCarnet(request, response, token) {
     try {
-      const result = await this.model.validateCarnetByToken(token);
+      const normalizedToken = String(token || '').trim();
+      if (!SHARE_TOKEN_PATTERN.test(normalizedToken)) {
+        responseHandler.notFound(response, 'Carnet not found', request);
+        return;
+      }
+      const result = await this.model.validateCarnetByToken(normalizedToken);
       if (!result) {
         responseHandler.notFound(response, 'Carnet not found', request);
         return;
@@ -257,6 +264,27 @@ class PeopleController {
       responseHandler.json(response, 200, result, request);
     } catch (error) {
       logger.error('Error validating carnet', error);
+      responseHandler.serverError(response);
+    }
+  }
+
+  async getPublicCard(request, response, token) {
+    try {
+      const normalizedToken = String(token || '').trim();
+      if (!SHARE_TOKEN_PATTERN.test(normalizedToken)) {
+        responseHandler.notFound(response, 'Carnet not found', request);
+        return;
+      }
+
+      const person = await this.model.getPublicCardByToken(normalizedToken);
+      if (!person) {
+        responseHandler.notFound(response, 'Carnet not found', request);
+        return;
+      }
+
+      responseHandler.json(response, 200, person, request);
+    } catch (error) {
+      logger.error('Error getting public card', error);
       responseHandler.serverError(response);
     }
   }

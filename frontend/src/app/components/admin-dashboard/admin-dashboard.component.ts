@@ -435,7 +435,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   private async downloadPersonCardPng(person: Person, filenameBase: string): Promise<void> {
     const { canvas, ctx } = createCarnetCanvas();
     if (!ctx) return;
-    await drawCarnetToCanvas(ctx, person, { cardUrl: this.cardUrlFor(person), validationUrl: this.validationUrlFor(person) });
+    const publicCardUrl = this.cardUrlFor(person);
+    await drawCarnetToCanvas(ctx, person, { cardUrl: publicCardUrl, validationUrl: publicCardUrl });
     downloadCanvasPng(canvas, `${filenameBase}_${new Date().toISOString().slice(0, 10)}`);
   }
 
@@ -444,11 +445,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   cardUrlFor(person: Person): string {
-    return `${window.location.origin}/card/${person.id}?shared=1`;
+    return person.activeCarnet?.qr_token ? `${window.location.origin}/public-card/${person.activeCarnet.qr_token}` : '';
   }
 
   async copyCardLink(person: Person): Promise<void> {
     const url = this.cardUrlFor(person);
+    if (!url) {
+      this.showError('Esta persona no tiene un token público de carnet disponible.');
+      return;
+    }
     try {
       await navigator.clipboard.writeText(url);
     } catch {

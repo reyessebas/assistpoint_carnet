@@ -21,6 +21,10 @@ export class PeopleService {
     return firstValueFrom(this.http.get<Person>(`${API_BASE_URL}/people/${id}`, { headers: this.headers() }));
   }
 
+  getPublicCard(token: string): Promise<Person> {
+    return firstValueFrom(this.http.get<Person>(`${API_BASE_URL.replace(/\/$/, '')}/carnets/share/${encodeURIComponent(token)}`));
+  }
+
   create(person: PersonFormValue): Promise<Person> {
     return firstValueFrom(this.http.post<Person>(`${API_BASE_URL}/people`, person, { headers: this.headers(true) }));
   }

@@ -8,6 +8,8 @@ import { PeopleService } from '../../services/people.service';
 import { resolveAssetUrl } from '../../shared/app-urls';
 import { createCarnetCanvas, downloadCanvasPng, drawCarnetToCanvas } from '../../shared/carnet-canvas';
 
+const SHARE_TOKEN_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{15,119}$/;
+
 @Component({
   selector: 'app-card-page',
   standalone: true,
@@ -33,8 +35,24 @@ export class CardPageComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
+    const token = this.route.snapshot.paramMap.get('token')?.trim() || '';
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.sharedView = this.route.snapshot.queryParamMap.get('shared') === '1';
+    this.sharedView = Boolean(token) || this.route.snapshot.queryParamMap.get('shared') === '1';
+    if (token) {
+      if (!SHARE_TOKEN_PATTERN.test(token)) {
+        this.error = 'No se encontró el carnet solicitado.';
+        this.loading = false;
+        return;
+      }
+      try {
+        this.person = await this.peopleService.getPublicCard(token);
+      } catch {
+        this.error = 'No se encontró el carnet solicitado.';
+      } finally {
+        this.loading = false;
+      }
+      return;
+    }
     if (!id) {
       void this.router.navigate(['/login']);
       return;
@@ -50,7 +68,7 @@ export class CardPageComponent implements OnInit {
 
   get qrUrl(): string {
     if (!this.person) return '';
-    const currentUrl = this.validationUrl;
+    const currentUrl = this.cardUrl;
     return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(currentUrl)}`;
   }
 
@@ -60,7 +78,8 @@ export class CardPageComponent implements OnInit {
   }
 
   get cardUrl(): string {
-    return this.person ? `${window.location.origin}/card/${this.person.id}?shared=1` : window.location.href;
+    const token = this.person?.activeCarnet?.qr_token;
+    return token ? `${window.location.origin}/public-card/${token}` : window.location.href;
   }
 
   resolveAvatar(): string {
@@ -89,7 +108,7 @@ export class CardPageComponent implements OnInit {
     if (!this.person) return;
     await this.peopleService.markCarnetDelivered(this.person.id, 'Correo');
     const subject = encodeURIComponent('Carnet digital Assist Point');
-    const body = encodeURIComponent(`Hola ${this.person.fullName},\n\nPuedes consultar y validar tu carnet digital en:\n${this.validationUrl}`);
+    const body = encodeURIComponent(`Hola ${this.person.fullName},\n\nPuedes consultar y validar tu carnet digital en:\n${this.cardUrl}`);
     window.location.href = `mailto:${this.person.email}?subject=${subject}&body=${body}`;
   }
 
@@ -97,7 +116,7 @@ export class CardPageComponent implements OnInit {
     if (!this.person) return;
     const { canvas, ctx } = createCarnetCanvas();
     if (!ctx) return;
-    await drawCarnetToCanvas(ctx, this.person, { cardUrl: this.cardUrl, validationUrl: this.validationUrl });
+    await drawCarnetToCanvas(ctx, this.person, { cardUrl: this.cardUrl, validationUrl: this.cardUrl });
     downloadCanvasPng(canvas, `carnet-${this.person.employeeCode || this.person.documentNumber || this.person.id}`);
   }
 

@@ -103,6 +103,14 @@ class MySqlPeopleModel {
     }
   }
 
+  generateShareToken() {
+    return crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(24).toString('hex');
+  }
+
+  publicCardUrl(token) {
+    return `${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/public-card/${encodeURIComponent(token)}`;
+  }
+
   async ensureCatalogsSchema() {
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS areas (
@@ -210,17 +218,64 @@ class MySqlPeopleModel {
         CONSTRAINT fk_carnets_people FOREIGN KEY (persona_id) REFERENCES people(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
+    await this.ensureCarnetsShareFields();
     const [peopleWithoutCard] = await this.pool.query(`
       SELECT p.id
       FROM people p
       WHERE NOT EXISTS (SELECT 1 FROM carnets c WHERE c.persona_id = p.id AND c.estado_carnet = 'Vigente')
     `);
     for (const person of peopleWithoutCard) {
-      const token = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(24).toString('hex');
+      const token = this.generateShareToken();
       await this.pool.execute(
         'INSERT INTO carnets (persona_id, codigo_carnet, qr_token, qr_url, version) VALUES (?, ?, ?, ?, 1)',
-        [person.id, `AP-${String(person.id).padStart(4, '0')}-V1`, token, `${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/validar-carnet/${token}`]
+        [person.id, `AP-${String(person.id).padStart(4, '0')}-V1`, token, this.publicCardUrl(token)]
       );
+    }
+  }
+
+  async ensureCarnetsShareFields() {
+    const [columns] = await this.pool.query('SHOW COLUMNS FROM carnets');
+    const columnNames = new Set(columns.map((column) => column.Field));
+
+    if (!columnNames.has('qr_token')) {
+      await this.pool.query('ALTER TABLE carnets ADD COLUMN qr_token VARCHAR(120) NULL AFTER codigo_carnet');
+    }
+
+    if (!columnNames.has('qr_url')) {
+      await this.pool.query('ALTER TABLE carnets ADD COLUMN qr_url VARCHAR(500) NULL AFTER qr_token');
+    }
+
+    const [missingTokens] = await this.pool.query("SELECT id FROM carnets WHERE qr_token IS NULL OR qr_token = ''");
+    for (const carnet of missingTokens) {
+      let saved = false;
+      while (!saved) {
+        try {
+          const token = this.generateShareToken();
+          await this.pool.execute('UPDATE carnets SET qr_token = ?, qr_url = ?, updated_at = NOW() WHERE id = ?', [
+            token,
+            this.publicCardUrl(token),
+            Number(carnet.id)
+          ]);
+          saved = true;
+        } catch (error) {
+          if (error && error.code === 'ER_DUP_ENTRY') continue;
+          throw error;
+        }
+      }
+    }
+
+    await this.pool.execute(
+      "UPDATE carnets SET qr_url = CONCAT(?, qr_token), updated_at = NOW() WHERE qr_token IS NOT NULL AND qr_token <> '' AND (qr_url IS NULL OR qr_url = '' OR qr_url NOT LIKE '%/public-card/%')",
+      [`${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/public-card/`]
+    );
+
+    await this.addUniqueIndexIfMissing('carnets', 'ux_carnets_token', 'qr_token');
+
+    try {
+      await this.pool.query('ALTER TABLE carnets MODIFY qr_token VARCHAR(120) NOT NULL');
+      await this.pool.query('ALTER TABLE carnets MODIFY qr_url VARCHAR(500) NOT NULL');
+    } catch (error) {
+      logger.warn(`Could not enforce carnet public link columns as NOT NULL: ${error.message}`);
     }
   }
 
@@ -264,6 +319,20 @@ class MySqlPeopleModel {
     const [rows] = await this.pool.execute(
       'SELECT id, fullName, email, documentNumber, department, role, site, status, mode, personType, employeeCode, phone, startDate, observations, avatar FROM people WHERE id = ? LIMIT 1',
       [Number(id)]
+    );
+    const people = await this.attachActiveCarnets(rows);
+    return people[0] || null;
+  }
+
+  async getPublicCardByToken(token) {
+    await this.ready;
+    const [rows] = await this.pool.execute(
+      `SELECT p.id, p.fullName, p.email, p.documentNumber, p.department, p.role, p.site, p.status, p.mode, p.personType, p.employeeCode, p.phone, p.startDate, p.observations, p.avatar
+       FROM carnets c
+       INNER JOIN people p ON p.id = c.persona_id
+       WHERE c.qr_token = ? AND c.estado_carnet = ? AND c.deleted_at IS NULL
+       LIMIT 1`,
+      [token, ACTIVE_CARD_STATUS]
     );
     const people = await this.attachActiveCarnets(rows);
     return people[0] || null;
@@ -422,8 +491,8 @@ class MySqlPeopleModel {
     await this.pool.execute('UPDATE carnets SET estado_carnet = ?, updated_at = NOW() WHERE persona_id = ? AND estado_carnet = ?', [REPLACED_CARD_STATUS, Number(personId), ACTIVE_CARD_STATUS]);
     const [versionRows] = await this.pool.execute('SELECT COALESCE(MAX(version), 0) + 1 AS nextVersion FROM carnets WHERE persona_id = ?', [Number(personId)]);
     const version = Number(versionRows[0]?.nextVersion || 1);
-    const token = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(24).toString('hex');
-    const qrUrl = `${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/validar-carnet/${token}`;
+    const token = this.generateShareToken();
+    const qrUrl = this.publicCardUrl(token);
     const code = `AP-${String(personId).padStart(4, '0')}-V${version}`;
     const [result] = await this.pool.execute(
       'INSERT INTO carnets (persona_id, codigo_carnet, qr_token, qr_url, version) VALUES (?, ?, ?, ?, ?)',
