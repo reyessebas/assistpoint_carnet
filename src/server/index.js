@@ -138,38 +138,83 @@ function createServer() {
 /**
  * Iniciar servidor
  */
-function start() {
-  const server = createServer();
-  const port = config.PORT;
+async function start() {
+  try {
+    logger.info('🔧 Assist Point Server — starting up...');
 
-  server.listen(port, () => {
-    logger.info(`🚀 Assist Point Server running at http://localhost:${port}`);
-    logger.info(`📁 Environment: ${config.NODE_ENV}`);
-    logger.info(`🗄️ Database: MySQL ${config.MYSQL_HOST}:${config.MYSQL_PORT}/${config.MYSQL_DATABASE}`);
-    logger.info(`🧩 Serve frontend from backend: ${config.SERVE_FRONTEND}`);
-  });
+    // Log all resolved config values (secrets are masked)
+    if (typeof config.logStartupConfig === 'function') {
+      config.logStartupConfig();
+    }
 
-  // Graceful shutdown
-  process.on('SIGTERM', () => {
-    logger.info('SIGTERM signal received: closing HTTP server');
-    server.close(() => {
-      logger.info('HTTP server closed');
-      process.exit(0);
+    logger.info(`📦 Node.js ${process.version} | PID ${process.pid}`);
+    logger.info(`🌍 Environment : ${config.NODE_ENV}`);
+    logger.info(`🔌 Port        : ${config.PORT}`);
+
+    // Verify database connectivity before accepting traffic
+    logger.info(`🗄️  Connecting to MySQL at ${config.MYSQL_HOST}:${config.MYSQL_PORT}/${config.MYSQL_DATABASE}...`);
+    const mysql = require('mysql2/promise');
+    const probePool = mysql.createPool({
+      host: config.MYSQL_HOST,
+      port: config.MYSQL_PORT,
+      user: config.MYSQL_USER,
+      password: config.MYSQL_PASSWORD,
+      database: config.MYSQL_DATABASE,
+      connectionLimit: 1,
     });
-  });
+    try {
+      const [rows] = await probePool.query('SELECT 1 AS ok');
+      if (rows[0]?.ok === 1) {
+        logger.info('✅ MySQL connection successful.');
+      }
+    } catch (dbError) {
+      logger.error(
+        `❌ MySQL connection failed: ${dbError.message}. ` +
+        'Check MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, and MYSQL_DATABASE.',
+        dbError
+      );
+      // Do not exit — the model will surface the error on first query and Railway will restart.
+    } finally {
+      await probePool.end().catch(() => {});
+    }
 
-  process.on('SIGINT', () => {
-    logger.info('SIGINT signal received: closing HTTP server');
-    server.close(() => {
-      logger.info('HTTP server closed');
-      process.exit(0);
+    const server = createServer();
+    const port = config.PORT;
+
+    server.listen(port, () => {
+      logger.info(`🚀 Assist Point Server listening on port ${port}`);
+      logger.info(`🌐 Public URL  : ${config.PUBLIC_APP_URL}`);
+      logger.info(`🧩 Frontend    : ${config.SERVE_FRONTEND ? 'served from backend' : 'served separately'}`);
     });
-  });
 
-  process.on('uncaughtException', (error) => {
-    logger.error('Uncaught Exception', error);
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+      logger.info('SIGTERM signal received: closing HTTP server');
+      server.close(() => {
+        logger.info('HTTP server closed');
+        process.exit(0);
+      });
+    });
+
+    process.on('SIGINT', () => {
+      logger.info('SIGINT signal received: closing HTTP server');
+      server.close(() => {
+        logger.info('HTTP server closed');
+        process.exit(0);
+      });
+    });
+
+    process.on('uncaughtException', (error) => {
+      logger.error('Uncaught Exception', error);
+      process.exit(1);
+    });
+
+  } catch (error) {
+    // Catch errors thrown during config validation or server creation (e.g. missing env vars)
+    console.error('[FATAL] Server failed to start:', error.message);
+    console.error(error);
     process.exit(1);
-  });
+  }
 }
 
 // Ejecutar si se llama directamente
