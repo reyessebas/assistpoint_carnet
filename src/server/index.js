@@ -98,6 +98,17 @@ function createServer() {
         return;
       }
 
+      if (pathname === '/api/health') {
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({
+          ok: true,
+          service: 'assist-point',
+          environment: config.NODE_ENV,
+          timestamp: new Date().toISOString()
+        }));
+        return;
+      }
+
       // Enrutamiento
       if (pathname.startsWith('/api/auth')) {
         const authRoutes = new AuthRoutes();

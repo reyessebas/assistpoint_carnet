@@ -5,15 +5,15 @@
 
 require('dotenv').config();
 
-const DEFAULT_JWT_SECRET = 'change_this_secret_in_production';
-const DEFAULT_ADMIN_PASSWORD = 'Admin123';
+const crypto = require('crypto');
+
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const MYSQL_HOST = process.env.MYSQL_HOST || '127.0.0.1';
 const MYSQL_USER = process.env.MYSQL_USER || 'root';
 const MYSQL_PASSWORD = process.env.MYSQL_PASSWORD || '';
 const MYSQL_DATABASE = process.env.MYSQL_DATABASE || 'assist_point';
-const JWT_SECRET = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || DEFAULT_ADMIN_PASSWORD;
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(48).toString('hex');
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const PUBLIC_APP_URL = process.env.PUBLIC_APP_URL || process.env.FRONTEND_URL || process.env.APP_URL || `http://localhost:${process.env.PORT || 3000}`;
 
 console.log(`[CONFIG] Loading environment configuration (NODE_ENV=${NODE_ENV})`);
@@ -28,16 +28,16 @@ function assertProductionSafety() {
 
   const errors = [];
 
-  if (!process.env.JWT_SECRET || JWT_SECRET === DEFAULT_JWT_SECRET) {
+  if (!process.env.JWT_SECRET) {
     errors.push(
-      'JWT_SECRET is missing or set to the insecure default. ' +
+      'JWT_SECRET is missing. ' +
       'Set a strong random string (min 32 chars) via the JWT_SECRET environment variable.'
     );
   }
 
-  if (!process.env.ADMIN_PASSWORD || ADMIN_PASSWORD === DEFAULT_ADMIN_PASSWORD) {
+  if (!process.env.ADMIN_PASSWORD) {
     errors.push(
-      'ADMIN_PASSWORD is missing or set to the insecure default "Admin123". ' +
+      'ADMIN_PASSWORD is missing. ' +
       'Set a strong password via the ADMIN_PASSWORD environment variable.'
     );
   }

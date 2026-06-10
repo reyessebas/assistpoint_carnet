@@ -33,6 +33,9 @@ function toMySqlDateTime(epochSeconds) {
 
 async function initializeMySqlAuth() {
   const db = getPool();
+  if (!config.ADMIN_PASSWORD) {
+    throw new Error('ADMIN_PASSWORD must be set before initializing the admin user.');
+  }
 
   await db.query(`
     CREATE TABLE IF NOT EXISTS users (

@@ -3,8 +3,24 @@ node_modules/
 
 # Environment (contains secrets)
 .env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
 .env.local
 .env.*.local
+*.pem
+*.key
+*.p12
+*.pfx
+credentials
+credentials.*
+.aws/
+aws-credentials*
+*dump*.sql
+*backup*.sql
+*.bak
 
 # Build outputs
 dist/

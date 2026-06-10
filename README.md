@@ -323,7 +323,7 @@ curl -s -H "Accept-Encoding: gzip" -k https://localhost:3000/api/people --output
 # login
 curl -s -X POST https://localhost:3000/api/auth/login -k \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@assistpoint.co","password":"Admin123"}' | jq
+  -d '{"email":"<ADMIN_EMAIL>","password":"<ADMIN_PASSWORD>"}' | jq
 
 # crear persona (reemplaza <ACCESS_TOKEN>)
 curl -s -X POST https://localhost:3000/api/people -k \
