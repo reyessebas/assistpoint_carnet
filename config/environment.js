@@ -8,7 +8,6 @@ require('dotenv').config();
 const DEFAULT_JWT_SECRET = 'change_this_secret_in_production';
 const DEFAULT_ADMIN_PASSWORD = 'Admin123';
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const DATA_DB = process.env.DATA_DB || 'json';
 const MYSQL_HOST = process.env.MYSQL_HOST || '127.0.0.1';
 const MYSQL_USER = process.env.MYSQL_USER || 'root';
 const MYSQL_PASSWORD = process.env.MYSQL_PASSWORD || '';
@@ -30,21 +29,19 @@ function assertProductionSafety() {
     throw new Error('ADMIN_PASSWORD must be set to a strong value in production.');
   }
 
-  if (DATA_DB === 'mysql') {
-    const missingMySql = [];
+  const missingMySql = [];
 
-    if (!process.env.MYSQL_HOST) missingMySql.push('MYSQL_HOST');
-    if (!process.env.MYSQL_USER) missingMySql.push('MYSQL_USER');
-    if (!process.env.MYSQL_PASSWORD) missingMySql.push('MYSQL_PASSWORD');
-    if (!process.env.MYSQL_DATABASE) missingMySql.push('MYSQL_DATABASE');
+  if (!process.env.MYSQL_HOST) missingMySql.push('MYSQL_HOST');
+  if (!process.env.MYSQL_USER) missingMySql.push('MYSQL_USER');
+  if (!process.env.MYSQL_PASSWORD) missingMySql.push('MYSQL_PASSWORD');
+  if (!process.env.MYSQL_DATABASE) missingMySql.push('MYSQL_DATABASE');
 
-    if (missingMySql.length > 0) {
-      throw new Error(`Missing required MySQL env vars in production: ${missingMySql.join(', ')}`);
-    }
+  if (missingMySql.length > 0) {
+    throw new Error(`Missing required MySQL env vars in production: ${missingMySql.join(', ')}`);
+  }
 
-    if (MYSQL_HOST === '127.0.0.1' || MYSQL_HOST === 'localhost') {
-      throw new Error('MYSQL_HOST must point to a persistent remote database in production.');
-    }
+  if (MYSQL_HOST === '127.0.0.1' || MYSQL_HOST === 'localhost') {
+    throw new Error('MYSQL_HOST must point to a persistent remote database in production.');
   }
 }
 
@@ -55,10 +52,7 @@ module.exports = {
   PORT: process.env.PORT || 3000,
   NODE_ENV,
 
-  // Data
-  DATA_DIR: process.env.DATA_DIR || './data',
-  // Data backend: 'json' (default), 'sqlite', or 'mysql'
-  DATA_DB,
+  // MySQL data store
   MYSQL_HOST,
   MYSQL_PORT: Number(process.env.MYSQL_PORT) || 3306,
   MYSQL_USER,

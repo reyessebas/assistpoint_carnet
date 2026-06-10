@@ -7,8 +7,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
 import { Person, PersonFormValue } from '../../models/person.model';
 import { PeopleService } from '../../services/people.service';
 
@@ -27,9 +25,7 @@ export interface PersonDialogData {
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatDividerModule
+    MatIconModule
   ],
   templateUrl: './person-form-dialog.component.html',
   styleUrl: './person-form-dialog.component.css'

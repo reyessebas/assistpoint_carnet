@@ -492,3 +492,64 @@
     width: 100%;
   }
 }
+
+/* ============================================================
+   DARK MODE OVERRIDES
+   ============================================================ */
+:host-context(html.dark) .dialog-content {
+  background: #0d1b2a;
+}
+
+:host-context(html.dark) .dialog-actions {
+  background: #101f30;
+  border-top-color: #1a2f47;
+}
+
+:host-context(html.dark) .form-section__header {
+  border-bottom-color: #1a2f47;
+}
+:host-context(html.dark) .form-section__header span { color: #64b5f6; }
+:host-context(html.dark) .form-section__header p    { color: #64748b; }
+
+:host-context(html.dark) ::ng-deep .mat-mdc-text-field-wrapper {
+  background: #101f30 !important;
+  border-color: #1a2f47 !important;
+}
+:host-context(html.dark) ::ng-deep .mat-mdc-text-field-wrapper:hover {
+  background: #132438 !important;
+  border-color: #243f5a !important;
+}
+:host-context(html.dark) ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
+  border-color: #64b5f6 !important;
+  box-shadow: 0 0 0 3px rgba(100,181,246,.12) !important;
+}
+:host-context(html.dark) ::ng-deep .mat-mdc-input-element,
+:host-context(html.dark) ::ng-deep .mat-mdc-select-value      { color: #e0e7ef !important; }
+:host-context(html.dark) ::ng-deep .mat-mdc-floating-label    { color: #64748b !important; }
+:host-context(html.dark) ::ng-deep .mat-mdc-form-field-icon-prefix { color: #64748b !important; }
+:host-context(html.dark) ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-floating-label { color: #64b5f6 !important; }
+:host-context(html.dark) ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-icon-prefix { color: #64b5f6 !important; }
+:host-context(html.dark) ::ng-deep .mat-mdc-select-arrow { color: #64748b !important; }
+
+:host-context(html.dark) .photo-uploader {
+  background: #101f30;
+  border-color: #1a2f47;
+}
+:host-context(html.dark) .photo-uploader__preview {
+  border-color: #1a2f47;
+  background: #0d1b2a;
+}
+:host-context(html.dark) .photo-uploader__title  { color: #e0e7ef; }
+:host-context(html.dark) .photo-uploader__body p { color: #64748b; }
+:host-context(html.dark) .photo-uploader__hint   { color: #475569; }
+
+:host-context(html.dark) .dialog-actions__secondary {
+  background: #101f30 !important;
+  border-color: #1a2f47 !important;
+  color: #94a3b8 !important;
+}
+:host-context(html.dark) .dialog-actions__secondary:hover {
+  background: #132438 !important;
+}
+
+:host-context(html.dark) ::ng-deep .mat-mdc-input-element::placeholder { color: #475569 !important; }

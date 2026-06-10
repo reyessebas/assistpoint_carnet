@@ -1,17 +1,10 @@
-const path = require('path');
 const crypto = require('crypto');
 const mysql = require('mysql2/promise');
-const fileSystem = require('./fileSystem');
 const config = require('../../../config/environment');
 const { hashPassword, verifyPassword } = require('./password');
 
-const STORE_PATH = path.join(config.DATA_DIR, 'refreshTokens.json');
 let pool;
 let ready;
-
-function isMySqlAuth() {
-  return config.DATA_DB === 'mysql';
-}
 
 function getPool() {
   if (!pool) {
@@ -83,10 +76,6 @@ async function initializeMySqlAuth() {
 }
 
 function ensureReady() {
-  if (!isMySqlAuth()) {
-    return Promise.resolve();
-  }
-
   if (!ready) {
     ready = initializeMySqlAuth();
   }
@@ -95,18 +84,7 @@ function ensureReady() {
 }
 
 const authStore = {
-  _read: () => fileSystem.readJSON(STORE_PATH) || [],
-  _write: (data) => fileSystem.writeJSON(STORE_PATH, data),
-
   findUserByCredentials: async (email, password) => {
-    if (!isMySqlAuth()) {
-      if (email !== config.ADMIN_EMAIL || password !== config.ADMIN_PASSWORD) {
-        return null;
-      }
-
-      return { email, role: 'admin' };
-    }
-
     await ensureReady();
     const [rows] = await getPool().execute(
       'SELECT id, email, passwordHash, role, isActive FROM users WHERE email = ? LIMIT 1',
@@ -122,10 +100,6 @@ const authStore = {
   },
 
   findUserByEmail: async (email) => {
-    if (!isMySqlAuth()) {
-      return email === config.ADMIN_EMAIL ? { email, role: 'admin' } : null;
-    }
-
     await ensureReady();
     const [rows] = await getPool().execute(
       'SELECT id, email, role, isActive FROM users WHERE email = ? LIMIT 1',
@@ -141,61 +115,42 @@ const authStore = {
   },
 
   add: async (token, email, expiresAt) => {
-    if (isMySqlAuth()) {
-      await ensureReady();
-      const user = await authStore.findUserByEmail(email);
+    await ensureReady();
+    const user = await authStore.findUserByEmail(email);
 
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      await getPool().execute(
-        'INSERT INTO refresh_tokens (userId, tokenHash, expiresAt) VALUES (?, ?, ?)',
-        [user.id, hashToken(token), toMySqlDateTime(expiresAt)]
-      );
-      return;
+    if (!user) {
+      throw new Error('User not found');
     }
 
-    const items = authStore._read();
-    items.push({ token, email, expiresAt });
-    authStore._write(items);
+    await getPool().execute(
+      'INSERT INTO refresh_tokens (userId, tokenHash, expiresAt) VALUES (?, ?, ?)',
+      [user.id, hashToken(token), toMySqlDateTime(expiresAt)]
+    );
   },
 
   remove: async (token) => {
-    if (isMySqlAuth()) {
-      await ensureReady();
-      await getPool().execute(
-        'UPDATE refresh_tokens SET revokedAt = CURRENT_TIMESTAMP WHERE tokenHash = ? AND revokedAt IS NULL',
-        [hashToken(token)]
-      );
-      return;
-    }
-
-    let items = authStore._read();
-    items = items.filter(i => i.token !== token);
-    authStore._write(items);
+    await ensureReady();
+    await getPool().execute(
+      'UPDATE refresh_tokens SET revokedAt = CURRENT_TIMESTAMP WHERE tokenHash = ? AND revokedAt IS NULL',
+      [hashToken(token)]
+    );
   },
 
   exists: async (token) => {
-    if (isMySqlAuth()) {
-      await ensureReady();
-      const [rows] = await getPool().execute(
-        `SELECT rt.id, u.email, u.role
-         FROM refresh_tokens rt
-         INNER JOIN users u ON u.id = rt.userId
-         WHERE rt.tokenHash = ?
-           AND rt.revokedAt IS NULL
-           AND rt.expiresAt > CURRENT_TIMESTAMP
-           AND u.isActive = 1
-         LIMIT 1`,
-        [hashToken(token)]
-      );
+    await ensureReady();
+    const [rows] = await getPool().execute(
+      `SELECT rt.id, u.email, u.role
+       FROM refresh_tokens rt
+       INNER JOIN users u ON u.id = rt.userId
+       WHERE rt.tokenHash = ?
+         AND rt.revokedAt IS NULL
+         AND rt.expiresAt > CURRENT_TIMESTAMP
+         AND u.isActive = 1
+       LIMIT 1`,
+      [hashToken(token)]
+    );
 
-      return rows[0] || null;
-    }
-
-    const items = authStore._read();
-    return items.find(i => i.token === token) || null;
+    return rows[0] || null;
   }
 };
 

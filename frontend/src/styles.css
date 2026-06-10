@@ -1,30 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
-/* Reset */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ============================================================
+   DESIGN TOKENS — Assist Point Healthcare (USA Clinics)
+   ============================================================ */
+:root {
+  /* Brand palette — medical authority blue */
+  --ap-pri-900: #0A2342;
+  --ap-pri-700: #0F3D73;
+  --ap-pri-600: #1351A0;
+  --ap-pri-500: #1565C0;
+  --ap-pri-400: #1976D2;
+  --ap-pri-300: #42A5F5;
+  --ap-pri-100: #BBDEFB;
+  --ap-pri-50:  #E3F2FD;
 
+  /* Accent — healthcare teal */
+  --ap-acc-600: #00838F;
+  --ap-acc-500: #0097A7;
+  --ap-acc-100: #E0F7FA;
+
+  /* ---- LIGHT MODE (default) ---- */
+  --ap-bg:        #F4F7FB;
+  --ap-surface:   #FFFFFF;
+  --ap-surface-2: #F7F9FD;
+  --ap-surface-3: #EEF3FA;
+  --ap-border:    #E2E8F0;
+  --ap-border-2:  #CBD5E1;
+
+  --ap-text:    #0D1B2A;
+  --ap-text-2:  #344054;
+  --ap-text-3:  #667085;
+  --ap-text-4:  #98A2B3;
+
+  --ap-primary:    #1565C0;
+  --ap-primary-on: #FFFFFF;
+
+  --ap-ok:      #2E7D32;
+  --ap-ok-bg:   #E8F5E9;
+  --ap-ok-ring: #A5D6A7;
+  --ap-err:     #C62828;
+  --ap-err-bg:  #FFEBEE;
+  --ap-err-ring:#EF9A9A;
+  --ap-warn:    #E65100;
+  --ap-warn-bg: #FFF8E1;
+  --ap-warn-ring:#FFE082;
+
+  --ap-sh-sm: 0 1px 4px rgba(13,27,42,.07);
+  --ap-sh-md: 0 4px 16px rgba(13,27,42,.09);
+  --ap-sh-lg: 0 10px 32px rgba(13,27,42,.11);
+  --ap-sh-xl: 0 20px 50px rgba(13,27,42,.13);
+
+  --ap-dur:  0.22s;
+  --ap-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ap-dur-slow: 0.35s;
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+html.dark {
+  --ap-bg:        #060E1A;
+  --ap-surface:   #0D1B2A;
+  --ap-surface-2: #101F30;
+  --ap-surface-3: #142640;
+  --ap-border:    #1A2F47;
+  --ap-border-2:  #243F5A;
+
+  --ap-text:   #E0E7EF;
+  --ap-text-2: #94A3B8;
+  --ap-text-3: #64748B;
+  --ap-text-4: #475569;
+
+  --ap-primary:    #64B5F6;
+  --ap-primary-on: #0D2E56;
+  --ap-pri-50:     rgba(100,181,246,.14);
+
+  --ap-ok:      #81C784;
+  --ap-ok-bg:   rgba(46,125,50,.18);
+  --ap-ok-ring: rgba(46,125,50,.35);
+  --ap-err:     #EF9A9A;
+  --ap-err-bg:  rgba(198,40,40,.18);
+  --ap-err-ring:rgba(198,40,40,.35);
+  --ap-warn:    #FFB74D;
+  --ap-warn-bg: rgba(230,81,0,.18);
+  --ap-warn-ring:rgba(230,81,0,.35);
+
+  --ap-sh-sm: 0 1px 4px rgba(0,0,0,.35);
+  --ap-sh-md: 0 4px 16px rgba(0,0,0,.38);
+  --ap-sh-lg: 0 10px 32px rgba(0,0,0,.42);
+  --ap-sh-xl: 0 20px 50px rgba(0,0,0,.5);
+
+  color-scheme: dark;
+}
+
+/* ============================================================
+   BASE RESET
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 html, body {
   height: 100%;
   font-family: 'Inter', Roboto, 'Helvetica Neue', sans-serif;
   font-size: 14px;
-  background: #f5f5f5;
-  color: #424242;
+  background: var(--ap-bg);
+  color: var(--ap-text);
   -webkit-font-smoothing: antialiased;
+  transition: background-color var(--ap-dur-slow) var(--ap-ease),
+              color var(--ap-dur-slow) var(--ap-ease);
 }
-
-a { text-decoration: none; }
+a  { text-decoration: none; color: inherit; }
 button, input, textarea, select { font: inherit; }
-button:focus-visible { outline: 2px solid #4a90e2; }
+button:focus-visible { outline: 2px solid var(--ap-primary); outline-offset: 2px; }
 
+/* ============================================================
+   MATERIAL DARK OVERRIDES
+   ============================================================ */
+html.dark .mat-mdc-menu-panel {
+  background: var(--ap-surface) !important;
+  border: 1px solid var(--ap-border) !important;
+  box-shadow: var(--ap-sh-lg) !important;
+}
+html.dark .mat-mdc-menu-item            { color: var(--ap-text) !important; }
+html.dark .mat-mdc-menu-item:hover,
+html.dark .mat-mdc-menu-item:focus      { background: var(--ap-surface-2) !important; }
+html.dark .mat-mdc-menu-item .mat-icon  { color: var(--ap-text-3) !important; }
+html.dark .mat-divider                  { border-top-color: var(--ap-border) !important; }
+html.dark .mdc-dialog__surface          { background: var(--ap-surface) !important; }
+html.dark .mat-mdc-select-panel {
+  background: var(--ap-surface) !important;
+  border: 1px solid var(--ap-border) !important;
+}
+html.dark .mat-mdc-option               { color: var(--ap-text) !important; }
+html.dark .mat-mdc-option:hover,
+html.dark .mat-mdc-option.mat-mdc-option-active { background: var(--ap-surface-2) !important; }
+
+/* Dialog panel */
 .person-dialog-panel .mdc-dialog__surface {
   border-radius: 18px !important;
-  background: #ffffff !important;
-  box-shadow: 0 22px 70px rgba(13, 24, 44, 0.26) !important;
+  background: var(--ap-surface) !important;
+  box-shadow: var(--ap-sh-xl) !important;
   overflow: hidden !important;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f1f1; }
-::-webkit-scrollbar-thumb { background: #bdbdbd; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #9e9e9e; }
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ap-border-2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ap-text-3); }
+
+/* ============================================================
+   GLOBAL ANIMATION KEYFRAMES
+   ============================================================ */
+@keyframes ap-fade-up {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ap-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ap-scale-in {
+  from { opacity: 0; transform: scale(0.93); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes ap-float {
+  0%,100% { transform: translateY(0px) rotate(-1deg); }
+  50%      { transform: translateY(-18px) rotate(1deg); }
+}
+@keyframes ap-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes ap-pulse-ring {
+  0%   { box-shadow: 0 0 0 0   rgba(21,101,192,.4); }
+  100% { box-shadow: 0 0 0 14px rgba(21,101,192,0); }
+}
+
+/* Utility animation classes */
+.ap-fade-up   { animation: ap-fade-up   .5s var(--ap-ease) both; }
+.ap-fade-up-1 { animation: ap-fade-up   .5s .08s var(--ap-ease) both; }
+.ap-fade-up-2 { animation: ap-fade-up   .5s .16s var(--ap-ease) both; }
+.ap-fade-up-3 { animation: ap-fade-up   .5s .24s var(--ap-ease) both; }
+.ap-fade-up-4 { animation: ap-fade-up   .5s .32s var(--ap-ease) both; }
+.ap-scale-in  { animation: ap-scale-in  .4s var(--ap-ease) both; }

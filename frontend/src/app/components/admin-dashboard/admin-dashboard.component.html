@@ -1,443 +1,405 @@
-<div class="dashboard-wrapper">
+<div class="dashboard-wrapper" [class.sidebar-open]="sidebarOpen">
 
-  <!-- Header -->
+  <!-- ════ HEADER ════ -->
   <header class="dashboard-header">
     <div class="dashboard-header__brand">
+      <!-- Hamburger (mobile only) -->
+      <button class="hamburger-btn" (click)="toggleMobileSidebar()"
+              [attr.aria-label]="sidebarOpen ? 'Close menu' : 'Open menu'">
+        <mat-icon>{{ sidebarOpen ? 'close' : 'menu' }}</mat-icon>
+      </button>
+
       <img src="/img/Curvas_Azul.png" alt="Logo" class="dashboard-header__logo">
       <h1 class="dashboard-header__title">ASSIST POINT</h1>
+      <span class="dashboard-header__subtitle">Healthcare ID System</span>
     </div>
+
     <div class="dashboard-header__actions">
-      <span>Administrador</span>
-      <button class="action-button" [matMenuTriggerFor]="profileMenu" matTooltip="Menú de usuario">
+      <!-- Dark mode toggle -->
+      <button class="header-icon-btn" (click)="toggleDark()"
+              [attr.aria-label]="isDark ? 'Light mode' : 'Dark mode'"
+              matTooltip="{{ isDark ? 'Switch to light mode' : 'Switch to dark mode' }}">
+        <mat-icon>{{ isDark ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+
+      <span class="header-admin-label">Administrator</span>
+      <button class="header-icon-btn" [matMenuTriggerFor]="profileMenu" matTooltip="User menu">
         <mat-icon>account_circle</mat-icon>
       </button>
       <mat-menu #profileMenu="matMenu">
         <button mat-menu-item disabled>
           <mat-icon>person</mat-icon>
-          <span>Administrador</span>
+          <span>Administrator</span>
         </button>
         <mat-divider></mat-divider>
         <button mat-menu-item (click)="logout()">
           <mat-icon>logout</mat-icon>
-          <span>Cerrar sesión</span>
+          <span>Sign out</span>
         </button>
       </mat-menu>
     </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- Mobile sidebar overlay -->
+  <div class="sidebar-overlay" (click)="closeMobileSidebar()"></div>
+
+  <!-- ════ MAIN CONTENT ════ -->
   <div class="dashboard-content">
 
     <!-- Stats Grid -->
     <div class="stats-grid">
-      <div class="stat-card stat-card--total">
-        <div class="stat-card__icon">
-          <mat-icon>group</mat-icon>
-        </div>
+      <div class="stat-card stat-card--total ap-fade-up">
+        <div class="stat-card__icon"><mat-icon>group</mat-icon></div>
         <div class="stat-card__body">
-          <span class="stat-card__label">Total Personas</span>
+          <span class="stat-card__label">Total Staff</span>
           <strong class="stat-card__value">{{ stats.total }}</strong>
         </div>
       </div>
 
-      <div class="stat-card stat-card--active">
-        <div class="stat-card__icon">
-          <mat-icon>verified</mat-icon>
-        </div>
+      <div class="stat-card stat-card--active ap-fade-up-1">
+        <div class="stat-card__icon"><mat-icon>verified</mat-icon></div>
         <div class="stat-card__body">
-          <span class="stat-card__label">Activos</span>
+          <span class="stat-card__label">Active</span>
           <strong class="stat-card__value">{{ stats.active }}</strong>
         </div>
       </div>
 
-      <div class="stat-card stat-card--dept">
-        <div class="stat-card__icon">
-          <mat-icon>corporate_fare</mat-icon>
-        </div>
+      <div class="stat-card stat-card--dept ap-fade-up-2">
+        <div class="stat-card__icon"><mat-icon>corporate_fare</mat-icon></div>
         <div class="stat-card__body">
-          <span class="stat-card__label">Áreas</span>
+          <span class="stat-card__label">Departments</span>
           <strong class="stat-card__value">{{ stats.departments }}</strong>
         </div>
       </div>
 
-      <div class="stat-card stat-card--remote">
-        <div class="stat-card__icon">
-          <mat-icon>location_on</mat-icon>
-        </div>
+      <div class="stat-card stat-card--remote ap-fade-up-3">
+        <div class="stat-card__icon"><mat-icon>location_on</mat-icon></div>
         <div class="stat-card__body">
-          <span class="stat-card__label">Sedes</span>
+          <span class="stat-card__label">Locations</span>
           <strong class="stat-card__value">{{ stats.sites }}</strong>
         </div>
       </div>
     </div>
 
-    <!-- Error Banner -->
-    <div *ngIf="error" role="alert" class="app-message app-message--error">
+    <!-- Messages -->
+    <div *ngIf="error" role="alert" class="app-message app-message--error ap-scale-in">
       <mat-icon>error_outline</mat-icon>
       <span>{{ error }}</span>
-      <button class="app-message__close" (click)="clearMessages()">
-        <mat-icon>close</mat-icon>
-      </button>
+      <button class="app-message__close" (click)="clearMessages()"><mat-icon>close</mat-icon></button>
     </div>
 
-    <div *ngIf="notice" role="status" class="app-message app-message--success">
+    <div *ngIf="notice" role="status" class="app-message app-message--success ap-scale-in">
       <mat-icon>check_circle</mat-icon>
       <span>{{ notice }}</span>
-      <button class="app-message__close" (click)="clearMessages()">
-        <mat-icon>close</mat-icon>
-      </button>
+      <button class="app-message__close" (click)="clearMessages()"><mat-icon>close</mat-icon></button>
     </div>
 
     <div class="dashboard-layout">
-      <aside class="admin-sidebar">
+
+      <!-- ════ SIDEBAR ════ -->
+      <aside class="admin-sidebar" [class.open]="sidebarOpen">
         <div class="admin-sidebar__title">
-          <span>Panel</span>
-          <strong>Administración</strong>
+          <span>Navigation</span>
+          <strong>Administration</strong>
         </div>
 
-        <button [class.active]="adminSection === 'people'" (click)="selectAdminSection('people')">
+        <button [class.active]="adminSection === 'people'" (click)="selectAdminSection('people'); closeMobileSidebar()">
           <mat-icon>badge</mat-icon>
-          <span>Personas y carnets</span>
+          <span>Staff &amp; ID Cards</span>
         </button>
-
-        <button [class.active]="adminSection === 'areas'" (click)="selectAdminSection('areas')">
+        <button [class.active]="adminSection === 'areas'" (click)="selectAdminSection('areas'); closeMobileSidebar()">
           <mat-icon>corporate_fare</mat-icon>
-          <span>Áreas</span>
+          <span>Departments</span>
         </button>
-
-        <button [class.active]="adminSection === 'cargos'" (click)="selectAdminSection('cargos')">
+        <button [class.active]="adminSection === 'cargos'" (click)="selectAdminSection('cargos'); closeMobileSidebar()">
           <mat-icon>work</mat-icon>
-          <span>Cargos</span>
+          <span>Positions</span>
         </button>
-
-        <button [class.active]="adminSection === 'sedes'" (click)="selectAdminSection('sedes')">
+        <button [class.active]="adminSection === 'sedes'" (click)="selectAdminSection('sedes'); closeMobileSidebar()">
           <mat-icon>location_on</mat-icon>
-          <span>Sedes</span>
+          <span>Locations</span>
         </button>
-
-        <button [class.active]="adminSection === 'modalidades'" (click)="selectAdminSection('modalidades')">
+        <button [class.active]="adminSection === 'modalidades'" (click)="selectAdminSection('modalidades'); closeMobileSidebar()">
           <mat-icon>sync_alt</mat-icon>
-          <span>Modalidades</span>
+          <span>Work Modes</span>
         </button>
-
-        <button [class.active]="adminSection === 'tiposPersona'" (click)="selectAdminSection('tiposPersona')">
+        <button [class.active]="adminSection === 'tiposPersona'" (click)="selectAdminSection('tiposPersona'); closeMobileSidebar()">
           <mat-icon>groups</mat-icon>
-          <span>Tipos de persona</span>
+          <span>Staff Types</span>
         </button>
       </aside>
 
+      <!-- ════ MAIN ════ -->
       <main class="admin-main">
 
-    <!-- Filters -->
-    <div class="filters-section" *ngIf="adminSection === 'people'">
-      <div class="filter-search">
-        <mat-icon>search</mat-icon>
-        <input
-          type="text"
-          class="filter-input"
-          placeholder="Buscar persona"
-          [(ngModel)]="search"
-          (input)="applyFilter()">
-      </div>
-
-      <select class="filter-select" [(ngModel)]="filterDepartment" (change)="applyFilter()">
-        <option value="">Todas las áreas</option>
-        <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
-      </select>
-
-      <select class="filter-select" [(ngModel)]="filterSite" (change)="applyFilter()">
-        <option value="">Todas las sedes</option>
-        <option *ngFor="let site of sites" [value]="site">{{ site }}</option>
-      </select>
-
-      <select class="filter-select" [(ngModel)]="filterStatus" (change)="applyFilter()">
-        <option value="">Todos los estados</option>
-        <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
-      </select>
-
-      <button
-        *ngIf="hasActiveFilters"
-        class="action-button"
-        (click)="clearFilters()"
-        matTooltip="Limpiar filtros">
-        <mat-icon>clear</mat-icon>
-      </button>
-
-      <div style="flex: 1;"></div>
-
-      <button
-        class="action-button"
-        (click)="toggleSort()"
-        matTooltip="{{ sortNewestFirst ? 'Ordenar: más antiguos' : 'Ordenar: más recientes' }}">
-        <mat-icon>{{ sortNewestFirst ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
-      </button>
-
-      <button
-        class="action-button"
-        (click)="exportPeople()"
-        matTooltip="Exportar CSV">
-        <mat-icon>download</mat-icon>
-      </button>
-
-      <input
-        #importInput
-        type="file"
-        accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
-        hidden
-        (change)="importPeopleFromFile($event)">
-
-      <button
-        class="action-button"
-        (click)="importInput.click()"
-        matTooltip="Importar Excel o CSV">
-        <mat-icon>upload_file</mat-icon>
-      </button>
-
-      <button
-        class="action-button"
-        (click)="selectActiveFiltered()"
-        matTooltip="Seleccionar todos filtrados">
-        <mat-icon>checklist</mat-icon>
-      </button>
-
-      <button
-        class="action-button action-button--delete"
-        (click)="deleteSelectedPeople()"
-        matTooltip="Eliminar seleccionados">
-        <mat-icon>delete</mat-icon>
-      </button>
-
-      <button
-        class="action-button"
-        (click)="downloadSelectedCarnets(true)"
-        matTooltip="Descargar seleccionados activos">
-        <mat-icon>badge</mat-icon>
-      </button>
-
-      <button
-        class="action-button"
-        (click)="downloadFilteredActiveCarnets()"
-        matTooltip="Descargar información de activos filtrados">
-        <mat-icon>file_download</mat-icon>
-      </button>
-
-      <button
-        class="action-button"
-        [class.active]="viewMode === 'carnets'"
-        (click)="setViewMode(viewMode === 'list' ? 'carnets' : 'list')"
-        matTooltip="{{ viewMode === 'list' ? 'Ver carnets' : 'Ver lista' }}">
-        <mat-icon>{{ viewMode === 'list' ? 'view_module' : 'list' }}</mat-icon>
-      </button>
-    </div>
-
-    <section class="catalog-admin" *ngIf="adminSection !== 'people'">
-      <div class="catalog-admin__header">
-        <div>
-          <h2>{{ catalogTitle }}</h2>
-          <p>Gestiona los valores disponibles para formularios, filtros e importaciones.</p>
-        </div>
-        <button class="action-button" (click)="addCatalogItem(catalogView)" matTooltip="Agregar elemento">
-          <mat-icon>add</mat-icon>
-        </button>
-      </div>
-
-      <div class="catalog-list" *ngIf="catalogItems.length > 0; else emptyCatalog">
-        <div class="catalog-row" *ngFor="let item of catalogItems">
-          <div>
-            <strong>{{ item.nombre }}</strong>
-            <span>{{ item.activo ? 'Activo' : 'Inactivo' }}</span>
+        <!-- Filters -->
+        <div class="filters-section" *ngIf="adminSection === 'people'">
+          <div class="filter-search">
+            <mat-icon>search</mat-icon>
+            <input type="text" class="filter-input" placeholder="Search staff..."
+                   [(ngModel)]="search" (input)="applyFilter()">
           </div>
-          <div class="catalog-row__actions">
-            <button class="action-button" (click)="editCatalogItem(catalogView, item)" matTooltip="Editar">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button class="action-button action-button--delete" (click)="deleteCatalogItem(catalogView, item)" matTooltip="Eliminar">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
+
+          <select class="filter-select" [(ngModel)]="filterDepartment" (change)="applyFilter()">
+            <option value="">All departments</option>
+            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="filterSite" (change)="applyFilter()">
+            <option value="">All locations</option>
+            <option *ngFor="let site of sites" [value]="site">{{ site }}</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="filterStatus" (change)="applyFilter()">
+            <option value="">All statuses</option>
+            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+          </select>
+
+          <button *ngIf="hasActiveFilters" class="action-button"
+                  (click)="clearFilters()" matTooltip="Clear filters">
+            <mat-icon>clear</mat-icon>
+          </button>
+
+          <div style="flex:1"></div>
+
+          <button class="action-button" (click)="toggleSort()"
+                  matTooltip="{{ sortNewestFirst ? 'Sort: oldest' : 'Sort: newest' }}">
+            <mat-icon>{{ sortNewestFirst ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+          </button>
+          <button class="action-button" (click)="exportPeople()" matTooltip="Export CSV">
+            <mat-icon>download</mat-icon>
+          </button>
+
+          <input #importInput type="file"
+                 accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
+                 hidden (change)="importPeopleFromFile($event)">
+          <button class="action-button" (click)="importInput.click()" matTooltip="Import Excel/CSV">
+            <mat-icon>upload_file</mat-icon>
+          </button>
+          <button class="action-button" (click)="selectActiveFiltered()" matTooltip="Select all filtered">
+            <mat-icon>checklist</mat-icon>
+          </button>
+          <button class="action-button action-button--delete" (click)="deleteSelectedPeople()" matTooltip="Delete selected">
+            <mat-icon>delete</mat-icon>
+          </button>
+          <button class="action-button" (click)="downloadSelectedCarnets(true)" matTooltip="Download active selected">
+            <mat-icon>badge</mat-icon>
+          </button>
+          <button class="action-button" (click)="downloadFilteredActiveCarnets()" matTooltip="Download active filtered info">
+            <mat-icon>file_download</mat-icon>
+          </button>
+          <button class="action-button" [class.active]="viewMode === 'carnets'"
+                  (click)="setViewMode(viewMode === 'list' ? 'carnets' : 'list')"
+                  matTooltip="{{ viewMode === 'list' ? 'Card view' : 'List view' }}">
+            <mat-icon>{{ viewMode === 'list' ? 'view_module' : 'list' }}</mat-icon>
+          </button>
         </div>
-      </div>
 
-      <ng-template #emptyCatalog>
-        <div class="empty-state empty-state--compact">
-          <mat-icon>inventory_2</mat-icon>
-          <p>No hay elementos en este catálogo.</p>
-        </div>
-      </ng-template>
-    </section>
-
-    <!-- Table -->
-    <div class="table-container" *ngIf="adminSection === 'people' && viewMode === 'list'">
-      <table>
-        <thead>
-          <tr>
-            <th style="width: 48px;">Sel.</th>
-            <th style="width: 84px;">Foto</th>
-            <th>Persona</th>
-            <th>Documento</th>
-            <th>Área</th>
-            <th>Sede</th>
-            <th>Estado</th>
-            <th>Modalidad</th>
-            <th style="width: 120px; text-align: center;">Acciones</th>
-          </tr>
-        </thead>
-        <tbody *ngIf="dataSource.data.length > 0; else emptyState">
-          <tr *ngFor="let person of dataSource.data; trackBy: trackById">
-            <td>
-              <input
-                type="checkbox"
-                [checked]="isSelected(person)"
-                (change)="togglePersonSelection(person, $any($event.target).checked)"
-                [attr.aria-label]="'Seleccionar ' + person.fullName">
-            </td>
-            <td>
-              <img *ngIf="person.avatar; else initials"
-                   [src]="resolveAvatar(person)"
-                   [alt]="'Foto de ' + person.fullName"
-                   class="table-avatar">
-              <ng-template #initials>
-                <div class="table-avatar table-avatar--placeholder">
-                  {{ avatarInitials(person.fullName) }}
-                </div>
-              </ng-template>
-            </td>
-            <td>
-              <div class="person-cell">
-                <strong>{{ person.fullName }}</strong>
-                <span>{{ person.role }}</span>
-              </div>
-              <div *ngIf="person.employeeCode" class="employee-code">
-                Código: {{ person.employeeCode }}
-              </div>
-            </td>
-            <td>
-              <div class="document-chip">
-                <mat-icon>badge</mat-icon>
-                {{ person.documentNumber }}
-              </div>
-            </td>
-            <td>{{ person.department }}</td>
-            <td>
-              <div class="site-badge">
-                <mat-icon>location_on</mat-icon>
-                {{ person.site || 'Colina' }}
-              </div>
-            </td>
-            <td>
-              <span
-                class="badge"
-                [class.badge--active]="person.status === 'Activo'"
-                [class.badge--inactive]="person.status === 'Inactivo'"
-                [class.badge--vacation]="person.status === 'Suspendido'">
-                {{ person.status }}
-              </span>
-            </td>
-            <td>
-              <div class="mode-badge">
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">
-                  {{ modeIcon(person.mode) }}
-                </mat-icon>
-                {{ person.mode }}
-              </div>
-            </td>
-            <td class="actions-cell">
-              <button class="action-button" (click)="viewCard(person)" matTooltip="Ver carnet">
-                <mat-icon>badge</mat-icon>
-              </button>
-              <button class="action-button" (click)="copyCardLink(person)" matTooltip="Copiar link del carnet">
-                <mat-icon>content_copy</mat-icon>
-              </button>
-              <button class="action-button" (click)="openPersonDialog(person)" matTooltip="Editar">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button class="action-button action-button--delete" (click)="deletePerson(person)" matTooltip="Eliminar">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <ng-template #emptyState>
-        <div class="empty-state">
-          <div class="empty-state__icon">🔍</div>
-          <h3 class="empty-state__title">No se encontraron personas</h3>
-          <p>Intenta ajustar los filtros o agrega una nueva persona</p>
-        </div>
-      </ng-template>
-    </div>
-
-    <!-- Carnet Preview Grid -->
-    <div class="carnets-grid-container" *ngIf="adminSection === 'people' && viewMode === 'carnets'">
-      <div *ngIf="filteredPeopleForCarnets.length > 0; else emptyStateCarnets" class="carnets-grid">
-        <div *ngFor="let person of filteredPeopleForCarnets; trackBy: trackById" class="carnet-preview-wrapper">
-          <div class="carnet-preview">
-            <div class="carnet-preview__pattern"></div>
-
-            <div class="carnet-preview__header">
-              <img src="/img/Curvas_Azul.png" alt="Logo" class="carnet-preview__logo">
-              <div class="carnet-preview__header-text">ASSIST POINT</div>
+        <!-- Catalog admin panel -->
+        <section class="catalog-admin" *ngIf="adminSection !== 'people'">
+          <div class="catalog-admin__header">
+            <div>
+              <h2>{{ catalogTitle }}</h2>
+              <p>Manage available values for forms, filters, and imports.</p>
             </div>
+            <button class="action-button" (click)="addCatalogItem(catalogView)" matTooltip="Add item">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
 
-            <div class="carnet-preview__body">
-              <div class="carnet-preview__identity">
-                <div class="carnet-preview__photo-frame">
-                  <img class="carnet-preview__photo" [src]="resolveAvatar(person)" [alt]="person.fullName">
-                  <span class="carnet-preview__status" [ngClass]="'status-' + statusClassCard(person.status)">
+          <div class="catalog-list" *ngIf="catalogItems.length > 0; else emptyCatalog">
+            <div class="catalog-row" *ngFor="let item of catalogItems">
+              <div>
+                <strong>{{ item.nombre }}</strong>
+                <span>{{ item.activo ? 'Active' : 'Inactive' }}</span>
+              </div>
+              <div class="catalog-row__actions">
+                <button class="action-button" (click)="editCatalogItem(catalogView, item)" matTooltip="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button class="action-button action-button--delete" (click)="deleteCatalogItem(catalogView, item)" matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+          <ng-template #emptyCatalog>
+            <div class="empty-state empty-state--compact">
+              <mat-icon>inventory_2</mat-icon>
+              <p>No items in this catalog.</p>
+            </div>
+          </ng-template>
+        </section>
+
+        <!-- ════ TABLE (list view) ════ -->
+        <div class="table-container" *ngIf="adminSection === 'people' && viewMode === 'list'">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-sel">Select</th>
+                <th class="col-photo">Photo</th>
+                <th>Staff Member</th>
+                <th class="col-doc">Document</th>
+                <th class="col-dept">Department</th>
+                <th class="col-site">Location</th>
+                <th>Status</th>
+                <th class="col-mode">Mode</th>
+                <th class="col-actions" style="text-align:center">Actions</th>
+              </tr>
+            </thead>
+            <tbody *ngIf="dataSource.data.length > 0; else emptyState">
+              <tr *ngFor="let person of dataSource.data; trackBy: trackById">
+
+                <td data-label="Select" class="col-sel">
+                  <input type="checkbox"
+                         [checked]="isSelected(person)"
+                         (change)="togglePersonSelection(person, $any($event.target).checked)"
+                         [attr.aria-label]="'Select ' + person.fullName">
+                </td>
+
+                <td data-label="Photo" class="col-photo">
+                  <img *ngIf="person.avatar; else initials"
+                       [src]="resolveAvatar(person)"
+                       [alt]="'Photo of ' + person.fullName"
+                       class="table-avatar">
+                  <ng-template #initials>
+                    <div class="table-avatar table-avatar--placeholder">
+                      {{ avatarInitials(person.fullName) }}
+                    </div>
+                  </ng-template>
+                </td>
+
+                <td data-label="Staff Member">
+                  <div class="person-cell">
+                    <strong>{{ person.fullName }}</strong>
+                    <span>{{ person.role }}</span>
+                  </div>
+                  <div *ngIf="person.employeeCode" class="employee-code">
+                    ID: {{ person.employeeCode }}
+                  </div>
+                </td>
+
+                <td data-label="Document" class="col-doc">
+                  <div class="document-chip">
+                    <mat-icon>badge</mat-icon>
+                    {{ person.documentNumber }}
+                  </div>
+                </td>
+
+                <td data-label="Department" class="col-dept">{{ person.department }}</td>
+
+                <td data-label="Location" class="col-site">
+                  <div class="site-badge">
+                    <mat-icon>location_on</mat-icon>
+                    {{ person.site || 'Main' }}
+                  </div>
+                </td>
+
+                <td data-label="Status">
+                  <span class="badge"
+                        [class.badge--active]="person.status === 'Activo'"
+                        [class.badge--inactive]="person.status === 'Inactivo'"
+                        [class.badge--vacation]="person.status === 'Suspendido'">
                     {{ person.status }}
                   </span>
+                </td>
+
+                <td data-label="Mode" class="col-mode">
+                  <div class="mode-badge">
+                    <mat-icon style="font-size:16px;width:16px;height:16px">
+                      {{ modeIcon(person.mode) }}
+                    </mat-icon>
+                    {{ person.mode }}
+                  </div>
+                </td>
+
+                <td data-label="Actions" class="actions-cell col-actions">
+                  <button class="action-button" (click)="viewCard(person)" matTooltip="View ID card">
+                    <mat-icon>badge</mat-icon>
+                  </button>
+                  <button class="action-button" (click)="copyCardLink(person)" matTooltip="Copy card link">
+                    <mat-icon>content_copy</mat-icon>
+                  </button>
+                  <button class="action-button" (click)="openPersonDialog(person)" matTooltip="Edit">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button class="action-button action-button--delete" (click)="deletePerson(person)" matTooltip="Delete">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+
+              </tr>
+            </tbody>
+          </table>
+
+          <ng-template #emptyState>
+            <div class="empty-state">
+              <div class="empty-state__icon">🔍</div>
+              <h3 class="empty-state__title">No staff members found</h3>
+              <p>Try adjusting your filters or add a new person</p>
+            </div>
+          </ng-template>
+        </div>
+
+        <!-- ════ CARNET GRID ════ -->
+        <div class="carnets-grid-container" *ngIf="adminSection === 'people' && viewMode === 'carnets'">
+          <div *ngIf="filteredPeopleForCarnets.length > 0; else emptyStateCarnets" class="carnets-grid">
+            <div *ngFor="let person of filteredPeopleForCarnets; trackBy: trackById" class="carnet-preview-wrapper">
+              <div class="carnet-preview">
+                <div class="carnet-preview__pattern"></div>
+                <div class="carnet-preview__header">
+                  <img src="/img/Curvas_Azul.png" alt="Logo" class="carnet-preview__logo">
+                  <div class="carnet-preview__header-text">ASSIST POINT</div>
+                </div>
+                <div class="carnet-preview__body">
+                  <div class="carnet-preview__identity">
+                    <div class="carnet-preview__photo-frame">
+                      <img class="carnet-preview__photo" [src]="resolveAvatar(person)" [alt]="person.fullName">
+                      <span class="carnet-preview__status" [ngClass]="'status-' + statusClassCard(person.status)">
+                        {{ person.status }}
+                      </span>
+                    </div>
+                  </div>
+                  <h3 class="carnet-preview__name">{{ person.fullName }}</h3>
+                  <p class="carnet-preview__role">{{ person.role }}</p>
+                  <div class="carnet-preview__details">
+                    <div class="carnet-preview__detail">{{ person.department }}</div>
+                    <div class="carnet-preview__detail">{{ person.site || 'Main' }} · {{ person.mode }}</div>
+                  </div>
+                  <div class="carnet-preview__footer">{{ person.employeeCode || person.documentNumber }}</div>
                 </div>
               </div>
-
-              <h3 class="carnet-preview__name">{{ person.fullName }}</h3>
-              <p class="carnet-preview__role">{{ person.role }}</p>
-
-              <div class="carnet-preview__details">
-                <div class="carnet-preview__detail">{{ person.department }}</div>
-                <div class="carnet-preview__detail">{{ person.site || 'Colina' }} · {{ person.mode }}</div>
-              </div>
-
-              <div class="carnet-preview__footer">
-                {{ person.employeeCode || person.documentNumber }}
+              <div class="carnet-preview-actions">
+                <button class="carnet-action-button" (click)="viewCard(person)" matTooltip="Full card">
+                  <mat-icon>fullscreen</mat-icon>
+                </button>
+                <button class="carnet-action-button" (click)="copyCardLink(person)" matTooltip="Copy link">
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+                <button class="carnet-action-button" (click)="openPersonDialog(person)" matTooltip="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button class="carnet-action-button carnet-action-button--delete" (click)="deletePerson(person)" matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
               </div>
             </div>
           </div>
-
-          <!-- Actions overlay -->
-          <div class="carnet-preview-actions">
-            <button class="carnet-action-button" (click)="viewCard(person)" matTooltip="Ver carnet completo">
-              <mat-icon>fullscreen</mat-icon>
-            </button>
-            <button class="carnet-action-button" (click)="copyCardLink(person)" matTooltip="Copiar link del carnet">
-              <mat-icon>content_copy</mat-icon>
-            </button>
-            <button class="carnet-action-button" (click)="openPersonDialog(person)" matTooltip="Editar">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button class="carnet-action-button carnet-action-button--delete" (click)="deletePerson(person)" matTooltip="Eliminar">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
+          <ng-template #emptyStateCarnets>
+            <div class="empty-state">
+              <div class="empty-state__icon">📋</div>
+              <h3 class="empty-state__title">No ID cards found</h3>
+              <p>Try adjusting your filters or add a new person</p>
+            </div>
+          </ng-template>
         </div>
-      </div>
-
-      <ng-template #emptyStateCarnets>
-        <div class="empty-state">
-          <div class="empty-state__icon">📋</div>
-          <h3 class="empty-state__title">No se encontraron carnets</h3>
-          <p>Intenta ajustar los filtros o agrega una nueva persona</p>
-        </div>
-      </ng-template>
-    </div>
 
       </main>
     </div>
-
   </div>
 
-  <!-- FAB Button -->
-  <button class="fab-button" (click)="openPersonDialog()" matTooltip="Agregar persona">
+  <!-- FAB -->
+  <button class="fab-button" (click)="openPersonDialog()" matTooltip="Add staff member">
     <mat-icon>add</mat-icon>
   </button>
 

@@ -17,7 +17,7 @@ const config = require('../../config/environment');
 const logger = require('./utils/logger');
 
 // Modelos
-const PeopleModel = require('./models/PeopleModel');
+const MySqlPeopleModel = require('./models/MySqlPeopleModel');
 
 // Controladores
 const PeopleController = require('./controllers/PeopleController');
@@ -35,16 +35,7 @@ const rateLimiter = require('./utils/rateLimiter');
  */
 function createServer() {
   // Inicializar modelo de datos
-  let peopleModel;
-  if (config.DATA_DB === 'sqlite') {
-    const SqlitePeopleModel = require('./models/SqlitePeopleModel');
-    peopleModel = new SqlitePeopleModel(config.DATA_DIR);
-  } else if (config.DATA_DB === 'mysql') {
-    const MySqlPeopleModel = require('./models/MySqlPeopleModel');
-    peopleModel = new MySqlPeopleModel();
-  } else {
-    peopleModel = new PeopleModel(config.DATA_DIR);
-  }
+  const peopleModel = new MySqlPeopleModel();
   const peopleController = new PeopleController(peopleModel);
   const peopleRouter = new PeopleRouter(peopleController);
   const staticHandler = config.SERVE_FRONTEND
@@ -154,7 +145,7 @@ function start() {
   server.listen(port, () => {
     logger.info(`🚀 Assist Point Server running at http://localhost:${port}`);
     logger.info(`📁 Environment: ${config.NODE_ENV}`);
-    logger.info(`📊 Data directory: ${config.DATA_DIR}`);
+    logger.info(`🗄️ Database: MySQL ${config.MYSQL_HOST}:${config.MYSQL_PORT}/${config.MYSQL_DATABASE}`);
     logger.info(`🧩 Serve frontend from backend: ${config.SERVE_FRONTEND}`);
   });
 

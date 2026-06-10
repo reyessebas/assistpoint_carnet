@@ -1,56 +1,155 @@
-<div class="login">
-    <div class="div">
-        <img class="curvas-azul" src="/img/Curvas_Azul_2.png" alt="Decoración" />
-        <header class="header">
-            <div class="frame">
-                <div class="frame-2">
-                    <img class="img" src="/img/Curvas_Azul.png" alt="Assist Point Logo" />
-                    <div class="text-wrapper">ASSIST POINT</div>
-                </div>
-                <div class="material-symbols">
-                    <img class="vector" src="/img/vector.svg" alt="Ícono" />
-                </div>
-            </div>
-        </header>
-        <div class="rectangle"></div>
-        <img class="element" src="/img/1.png" alt="Elemento decorativo 1" />
-        <div class="rectangle-2"></div>
-        <img class="element-2" src="/img/2.png" alt="Elemento decorativo 2" />
+<div class="lp">
 
-        <div class="form-log-in-wrapper">
-            <form class="form-log-in" (ngSubmit)="onSubmit()" autocomplete="off">
-                <div class="input-field">
-                    <label class="label" for="email">Email</label>
-                    <div class="input">
-                        <input id="email" name="email" type="email" class="text-input"
-                               [(ngModel)]="email" placeholder="correo@assistpoint.co" required />
-                    </div>
-                </div>
-                <div class="input-field-2">
-                    <label class="label" for="password">Password</label>
-                    <div class="input">
-                        <input id="password" name="password" [type]="hidePassword ? 'password' : 'text'"
-                               class="text-input" [(ngModel)]="password" placeholder="Password" required />
-                        <button type="button" class="password-toggle" (click)="hidePassword = !hidePassword"
-                                [attr.aria-label]="hidePassword ? 'Mostrar contraseña' : 'Ocultar contraseña'"
-                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem;">
-                            {{ hidePassword ? '👁️‍🗨️' : '👁️' }}
-                        </button>
-                    </div>
-                </div>
-                <div class="button-group">
-                    <button class="button" type="submit" [disabled]="loading">
-                        <div class="button-2">{{ loading ? 'INGRESANDO...' : 'Sign In' }}</div>
-                    </button>
-                </div>
-                <div class="login-feedback" *ngIf="error" role="alert">{{ error }}</div>
-            </form>
-        </div>
-        <div class="text-wrapper-3">ID CARD SYSTEM</div>
+  <aside class="lp__hero">
+    <div class="lp__hero-shade"></div>
+    <div class="lp__deco-curves"
+         [style.transform]="'translate('+(px*.06)+'px,'+(py*.06)+'px)'">
+      <img src="/img/Curvas_Azul_2.png" alt="">
     </div>
-    <div class="footer">
-        <div class="footerr">
-            <div class="text-wrapper-4">.</div>
+
+    <div class="lp__hero-body">
+
+      <!-- Logotipo superior -->
+      <div class="lp__logo-bar lp-anim lp-anim--0">
+        <div class="lp__logo-mark">
+          <img src="/img/Curvas_Azul.png" alt="Assist Point">
         </div>
+        <div class="lp__logo-text">
+          <span class="lp__logo-name">ASSIST POINT</span>
+          <span class="lp__logo-tag">Control de acceso e identificación</span>
+        </div>
+      </div>
+
+      <div class="lp__main-title lp-anim lp-anim--1">
+        <span class="lp__pre-title">
+          <span class="lp__pre-dot"></span>
+          Sistema de Carnetización
+        </span>
+        <h1>
+          <span>Sistema de Carnetización</span>
+          <em>Assist Point</em>
+        </h1>
+      </div>
+
     </div>
+
+    <footer class="lp__hero-foot">
+      <span>© 2025 Assist Point</span>
+      <span class="lp__foot-dot">·</span>
+      <span>Sistema de Carnetización</span>
+    </footer>
+  </aside>
+
+  <main class="lp__panel">
+
+    <!-- Boton de tema -->
+    <button class="lp__theme-btn" type="button"
+            (click)="toggleDark()"
+            [attr.aria-label]="isDark ? 'Modo claro' : 'Modo oscuro'">
+      <mat-icon>{{ isDark ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+
+    <div class="lp__form-box">
+
+      <!-- Brand movil (solo visible en pantallas pequenas) -->
+      <div class="lp__mobile-brand">
+        <img src="/img/Curvas_Azul.png" alt="Assist Point">
+        <div>
+          <b>ASSIST POINT</b>
+          <small>Sistema de Carnetización</small>
+        </div>
+      </div>
+
+      <!-- Encabezado del formulario -->
+      <div class="lp__form-head lp-anim lp-anim--0">
+        <div class="lp__form-topline">
+          <div class="lp__form-badge">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span>Panel Administrativo</span>
+          </div>
+        </div>
+        <h2>Ingreso al sistema de carnetización</h2>
+        <p>Acceso seguro para administrar personal, carnets y validaciones Assist Point.</p>
+      </div>
+
+      <!-- Formulario -->
+      <form class="lp__form lp-anim lp-anim--1"
+            (ngSubmit)="onSubmit()" autocomplete="off" novalidate>
+
+        <!-- Campo email -->
+        <div class="lp__field">
+          <label class="lp__label" for="login-email">
+            Correo electrónico
+          </label>
+          <div class="lp__input-row" [class.lp__input-row--focus]="emailFocused">
+            <span class="lp__icon-slot">
+              <mat-icon>mail_outline</mat-icon>
+            </span>
+            <input
+              id="login-email"
+              name="email"
+              type="email"
+              class="lp__input"
+              [(ngModel)]="email"
+              placeholder="admin@assistpoint.co"
+              required
+              (focus)="emailFocused = true"
+              (blur)="emailFocused = false">
+          </div>
+        </div>
+
+        <!-- Campo contraseña -->
+        <div class="lp__field">
+          <label class="lp__label" for="login-password">
+            Contraseña
+          </label>
+          <div class="lp__input-row" [class.lp__input-row--focus]="passFocused">
+            <span class="lp__icon-slot">
+              <mat-icon>lock_outline</mat-icon>
+            </span>
+            <input
+              id="login-password"
+              name="password"
+              [type]="hidePassword ? 'password' : 'text'"
+              class="lp__input"
+              [(ngModel)]="password"
+              placeholder="••••••••"
+              required
+              (focus)="passFocused = true"
+              (blur)="passFocused = false">
+            <button type="button" class="lp__eye-btn"
+                    (click)="hidePassword = !hidePassword"
+                    [attr.aria-label]="hidePassword ? 'Ver contraseña' : 'Ocultar contraseña'">
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div *ngIf="error" class="lp__error" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ error }}</span>
+        </div>
+
+        <!-- Boton de ingreso -->
+        <button class="lp__submit" type="submit" [disabled]="loading">
+          <ng-container *ngIf="!loading">
+            <span>Ingresar al sistema</span>
+          </ng-container>
+          <ng-container *ngIf="loading">
+            <mat-icon class="lp__spin">sync</mat-icon>
+            <span>Verificando...</span>
+          </ng-container>
+        </button>
+
+      </form>
+
+      <!-- Footer del formulario -->
+      <p class="lp__form-note lp-anim lp-anim--2">
+        Solo personal autorizado de Assist Point
+      </p>
+
+    </div>
+  </main>
+
 </div>

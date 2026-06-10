@@ -1,22 +1,13 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatCardModule } from '@angular/material/card';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatButtonModule } from '@angular/material/button';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatChipsModule } from '@angular/material/chips';
 import { PersonFormDialogComponent, PersonDialogData } from '../person-form-dialog/person-form-dialog.component';
 import { CatalogItem, Catalogs, Person, PersonFormValue, SedeCatalogItem } from '../../models/person.model';
 import { AuthService } from '../../services/auth.service';
@@ -32,26 +23,17 @@ type CatalogType = 'areas' | 'cargos' | 'sedes' | 'modalidades' | 'tiposPersona'
   imports: [
     CommonModule,
     FormsModule,
-    MatToolbarModule,
-    MatCardModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatButtonModule,
     MatIconModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatSelectModule,
     MatTooltipModule,
-    MatProgressSpinnerModule,
     MatMenuModule,
     MatDividerModule,
-    MatDialogModule,
-    MatChipsModule
+    MatDialogModule
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css'
 })
-export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
+  // ── Business state (unchanged) ──
   people: Person[] = [];
   loading = true;
   error = '';
@@ -68,10 +50,11 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
   selectedPersonIds = new Set<number>();
   private messageTimer: ReturnType<typeof window.setTimeout> | null = null;
 
-  displayedColumns = ['avatar', 'fullName', 'documentNumber', 'department', 'site', 'status', 'mode', 'actions'];
   dataSource = new MatTableDataSource<Person>([]);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  // ── UI state ──
+  isDark = false;
+  sidebarOpen = false;
 
   constructor(
     private readonly peopleService: PeopleService,
@@ -80,12 +63,24 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
     private readonly dialog: MatDialog
   ) {}
 
-  ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
+  async ngOnInit(): Promise<void> {
+    this.isDark = localStorage.getItem('ap-theme') === 'dark';
+    document.documentElement.classList.toggle('dark', this.isDark);
+    await this.loadPeople();
   }
 
-  async ngOnInit(): Promise<void> {
-    await this.loadPeople();
+  toggleDark(): void {
+    this.isDark = !this.isDark;
+    localStorage.setItem('ap-theme', this.isDark ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark', this.isDark);
+  }
+
+  toggleMobileSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeMobileSidebar(): void {
+    this.sidebarOpen = false;
   }
 
   ngOnDestroy(): void {
@@ -196,9 +191,6 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit, OnDestroy
       this.sortNewestFirst ? b.id - a.id : a.id - b.id
     );
 
-    if (this.paginator) {
-      this.paginator.firstPage();
-    }
   }
 
   get departments(): string[] {

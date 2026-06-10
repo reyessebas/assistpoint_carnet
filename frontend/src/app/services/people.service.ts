@@ -57,17 +57,6 @@ export class PeopleService {
     return firstValueFrom(this.http.delete<void>(`${API_BASE_URL.replace(/\/$/, '')}/catalogs/${type}/${id}`, { headers: this.headers(true) }));
   }
 
-  exportCsv(): Promise<Blob> {
-    return firstValueFrom(this.http.get(`${API_BASE_URL}/people/export`, {
-      headers: this.headers(true),
-      responseType: 'blob'
-    }));
-  }
-
-  generateCarnet(personId: number): Promise<Carnet> {
-    return firstValueFrom(this.http.post<Carnet>(`${API_BASE_URL}/people/${personId}/carnets`, {}, { headers: this.headers(true) }));
-  }
-
   markCarnetDelivered(personId: number, method = 'Correo'): Promise<Carnet> {
     return firstValueFrom(this.http.post<Carnet>(`${API_BASE_URL}/people/${personId}/carnets/deliver`, { metodo_entrega: method }, { headers: this.headers(true) }));
   }
