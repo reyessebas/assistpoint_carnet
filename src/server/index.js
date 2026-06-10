@@ -16,6 +16,9 @@ const { URL } = require('url');
 const config = require('../../config/environment');
 const logger = require('./utils/logger');
 
+// DB initializer
+const initDb = require('./utils/initDb');
+
 // Modelos
 const MySqlPeopleModel = require('./models/MySqlPeopleModel');
 
@@ -150,6 +153,16 @@ async function start() {
     logger.info(`📦 Node.js ${process.version} | PID ${process.pid}`);
     logger.info(`🌍 Environment : ${config.NODE_ENV}`);
     logger.info(`🔌 Port        : ${config.PORT}`);
+
+    // Initialize database schema before accepting requests
+    logger.info('🗄️  Initializing database schema...');
+    try {
+      await initDb();
+      logger.info('✅ Database schema ready.');
+    } catch (err) {
+      logger.error('❌ Database initialization failed', err);
+      process.exit(1);
+    }
 
     // Verify database connectivity before accepting traffic
     logger.info(`🗄️  Connecting to MySQL at ${config.MYSQL_HOST}:${config.MYSQL_PORT}/${config.MYSQL_DATABASE}...`);
