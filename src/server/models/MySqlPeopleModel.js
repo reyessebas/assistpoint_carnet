@@ -13,18 +13,28 @@ const PERSON_ACTIVE_STATUS = 'Activo';
 
 class MySqlPeopleModel {
   constructor() {
-    this.pool = mysql.createPool({
-      host: config.MYSQL_HOST,
-      port: config.MYSQL_PORT,
-      user: config.MYSQL_USER,
-      password: config.MYSQL_PASSWORD,
-      database: config.MYSQL_DATABASE,
-      waitForConnections: true,
-      connectionLimit: config.MYSQL_CONNECTION_LIMIT,
-      queueLimit: 0
-    });
+    logger.info(`MySqlPeopleModel: connecting to ${config.MYSQL_HOST}:${config.MYSQL_PORT}/${config.MYSQL_DATABASE} as ${config.MYSQL_USER}`);
 
-    this.ready = this.initialize();
+    try {
+      this.pool = mysql.createPool({
+        host: config.MYSQL_HOST,
+        port: config.MYSQL_PORT,
+        user: config.MYSQL_USER,
+        password: config.MYSQL_PASSWORD,
+        database: config.MYSQL_DATABASE,
+        waitForConnections: true,
+        connectionLimit: config.MYSQL_CONNECTION_LIMIT,
+        queueLimit: 0
+      });
+    } catch (err) {
+      logger.error('MySqlPeopleModel: failed to create connection pool', err);
+      throw err;
+    }
+
+    this.ready = this.initialize().catch((err) => {
+      logger.error('MySqlPeopleModel: database initialization failed', err);
+      throw err;
+    });
   }
 
   async initialize() {

@@ -139,7 +139,26 @@ function createServer() {
  * Iniciar servidor
  */
 function start() {
-  const server = createServer();
+  // Catch unhandled promise rejections (e.g. DB init failures) before anything else.
+  process.on('unhandledRejection', (reason, promise) => {
+    logger.error('Unhandled Promise Rejection — server will exit', reason);
+    process.exit(1);
+  });
+
+  process.on('uncaughtException', (error) => {
+    logger.error('Uncaught Exception — server will exit', error);
+    process.exit(1);
+  });
+
+  let server;
+  try {
+    logger.info('Starting Assist Point Server...');
+    server = createServer();
+  } catch (err) {
+    logger.error('Fatal error during server initialisation — server will exit', err);
+    process.exit(1);
+  }
+
   const port = config.PORT;
 
   server.listen(port, () => {
@@ -164,11 +183,6 @@ function start() {
       logger.info('HTTP server closed');
       process.exit(0);
     });
-  });
-
-  process.on('uncaughtException', (error) => {
-    logger.error('Uncaught Exception', error);
-    process.exit(1);
   });
 }
 
