@@ -74,7 +74,7 @@ function createServer() {
       response.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
       response.setHeader('Permissions-Policy', "camera=(), microphone=(), geolocation=()");
       // Content Security Policy - basic default (adjust per frontend needs)
-      response.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline' data:; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:");
+      response.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline' data:; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:");
 
       // Rate limiting (by IP)
       const clientIp = request.headers['x-forwarded-for']?.split(',')[0].trim() || request.socket.remoteAddress || 'unknown';
