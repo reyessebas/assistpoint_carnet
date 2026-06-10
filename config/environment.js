@@ -22,11 +22,15 @@ function assertProductionSafety() {
   }
 
   if (!process.env.JWT_SECRET || JWT_SECRET === DEFAULT_JWT_SECRET) {
-    throw new Error('JWT_SECRET must be set to a strong value in production.');
+    const err = new Error('JWT_SECRET must be set to a strong value in production.');
+    console.error('[FATAL] config/environment.js validation failed:', err.message);
+    throw err;
   }
 
   if (!process.env.ADMIN_PASSWORD || ADMIN_PASSWORD === DEFAULT_ADMIN_PASSWORD) {
-    throw new Error('ADMIN_PASSWORD must be set to a strong value in production.');
+    const err = new Error('ADMIN_PASSWORD must be set to a strong value in production.');
+    console.error('[FATAL] config/environment.js validation failed:', err.message);
+    throw err;
   }
 
   const missingMySql = [];
@@ -37,15 +41,24 @@ function assertProductionSafety() {
   if (!process.env.MYSQL_DATABASE) missingMySql.push('MYSQL_DATABASE');
 
   if (missingMySql.length > 0) {
-    throw new Error(`Missing required MySQL env vars in production: ${missingMySql.join(', ')}`);
+    const err = new Error(`Missing required MySQL env vars in production: ${missingMySql.join(', ')}`);
+    console.error('[FATAL] config/environment.js validation failed:', err.message);
+    throw err;
   }
 
   if (MYSQL_HOST === '127.0.0.1' || MYSQL_HOST === 'localhost') {
-    throw new Error('MYSQL_HOST must point to a persistent remote database in production.');
+    const err = new Error('MYSQL_HOST must point to a persistent remote database in production.');
+    console.error('[FATAL] config/environment.js validation failed:', err.message);
+    throw err;
   }
 }
 
-assertProductionSafety();
+try {
+  assertProductionSafety();
+} catch (err) {
+  // Error already logged inside assertProductionSafety; re-throw to abort startup.
+  throw err;
+}
 
 module.exports = {
   // Server
