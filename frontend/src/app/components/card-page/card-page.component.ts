@@ -36,7 +36,7 @@ export class CardPageComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     const token = this.route.snapshot.paramMap.get('token')?.trim() || '';
-    this.sharedView = true;
+    this.sharedView = !this.router.url.startsWith('/admin/card/');
     if (!SHARE_TOKEN_PATTERN.test(token)) {
       this.error = 'No se encontró el carnet solicitado.';
       this.loading = false;
@@ -88,14 +88,6 @@ export class CardPageComponent implements OnInit {
       document.execCommand('copy');
       input.remove();
     }
-  }
-
-  async sendByEmail(): Promise<void> {
-    if (!this.person) return;
-    await this.peopleService.markCarnetDelivered(this.person.id, 'Correo');
-    const subject = encodeURIComponent('Carnet digital Assist Point');
-    const body = encodeURIComponent(`Hola ${this.person.fullName},\n\nPuedes consultar y validar tu carnet digital en:\n${this.cardUrl}`);
-    window.location.href = `mailto:${this.person.email}?subject=${subject}&body=${body}`;
   }
 
   async downloadCard(): Promise<void> {

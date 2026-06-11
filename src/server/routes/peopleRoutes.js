@@ -39,8 +39,8 @@ class PeopleRouter {
       return;
     }
 
-    const catalogCreateMatch = pathname.match(/^\/api\/catalogs\/(areas|cargos|sedes|modalidades|tiposPersona)$/);
-    const catalogItemMatch = pathname.match(/^\/api\/catalogs\/(areas|cargos|sedes|modalidades|tiposPersona)\/(\d+)$/);
+    const catalogCreateMatch = pathname.match(/^\/api\/catalogs\/(areas|cargos|sedes|modalidades)$/);
+    const catalogItemMatch = pathname.match(/^\/api\/catalogs\/(areas|cargos|sedes|modalidades)\/(\d+)$/);
     if (method === 'POST' && catalogCreateMatch) {
       try {
         requireAuth();

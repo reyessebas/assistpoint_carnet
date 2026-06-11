@@ -14,13 +14,6 @@ function sanitizeString(value) {
   return s;
 }
 
-function isValidEmail(email) {
-  if (!email) return false;
-  // simple RFC-like regex
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
-  return re.test(String(email).toLowerCase());
-}
-
 function isValidUrl(url) {
   if (!url) return false;
   try {
@@ -76,30 +69,28 @@ function validatePersonData(input = {}) {
   const normalizedStatus = sanitizeString(input.status || 'Activo') || 'Activo';
   const data = {
     fullName: sanitizeString(input.fullName),
-    email: sanitizeString(input.email),
     documentNumber: sanitizeString(input.documentNumber),
     department: sanitizeString(input.department),
     role: sanitizeString(input.role),
     site: sanitizeString(input.site || 'Colina') || 'Colina',
     status: normalizedStatus === 'Vacaciones' ? 'Suspendido' : normalizedStatus,
     mode: sanitizeString(input.mode || 'Presencial') || 'Presencial',
-    personType: sanitizeString(input.personType || 'Empleado') || 'Empleado',
     employeeCode: sanitizeString(input.employeeCode || ''),
     phone: sanitizeString(input.phone || ''),
+    bloodType: sanitizeString(input.bloodType || ''),
+    emergencyContact: sanitizeString(input.emergencyContact || ''),
     startDate: normalizeDate(input.startDate || ''),
     observations: sanitizeString(input.observations || ''),
     avatar: sanitizeString(input.avatar || 'img/defecto_perfil.jpeg') || 'img/defecto_perfil.jpeg'
   };
 
   // required fields
-  ['fullName', 'email', 'documentNumber', 'department', 'role'].forEach((f) => {
+  ['fullName', 'documentNumber', 'department', 'role'].forEach((f) => {
     if (!data[f]) errors.push(`${f} is required`);
     if (data[f] && data[f].length > 255) errors.push(`${f} must be <= 255 chars`);
   });
 
   if (data.fullName && data.fullName.length < 1) errors.push('fullName too short');
-
-  if (!isValidEmail(data.email)) errors.push('email is invalid');
 
   if (!data.department) errors.push('department is required');
   if (!data.role) errors.push('role is required');
@@ -110,7 +101,8 @@ function validatePersonData(input = {}) {
   }
 
   if (data.mode && data.mode.length > 80) errors.push('mode must be <= 80 chars');
-  if (data.personType && data.personType.length > 80) errors.push('personType must be <= 80 chars');
+  if (data.bloodType && data.bloodType.length > 10) errors.push('bloodType must be <= 10 chars');
+  if (data.emergencyContact && data.emergencyContact.length > 180) errors.push('emergencyContact must be <= 180 chars');
 
   if (!isValidDateValue(data.startDate)) {
     errors.push('startDate must use YYYY-MM-DD format');
@@ -128,4 +120,4 @@ function validatePersonData(input = {}) {
   return { valid: errors.length === 0, errors, data };
 }
 
-module.exports = { validatePersonData, sanitizeString, isValidEmail };
+module.exports = { validatePersonData, sanitizeString };

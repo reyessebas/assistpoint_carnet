@@ -74,8 +74,12 @@
         <dd>{{ result.person.mode }}</dd>
       </div>
       <div>
-        <dt>Tipo</dt>
-        <dd>{{ result.person.personType }}</dd>
+        <dt>RH</dt>
+        <dd>{{ result.person.bloodType || 'No registrado' }}</dd>
+      </div>
+      <div>
+        <dt>Contacto emergencia</dt>
+        <dd>{{ result.person.emergencyContact || 'No registrado' }}</dd>
       </div>
       <div>
         <dt>Estado persona</dt>

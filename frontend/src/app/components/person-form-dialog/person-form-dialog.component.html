@@ -21,7 +21,7 @@
     <div class="form-section__header">
       <div>
         <span>Información personal</span>
-        <p>Datos básicos para identificar y contactar a la persona.</p>
+        <p>Datos básicos para identificar a la persona y emitir el carnet.</p>
       </div>
     </div>
 
@@ -32,14 +32,6 @@
         <input matInput formControlName="fullName" placeholder="Andrea Torres" required>
         <mat-error *ngIf="form.get('fullName')?.hasError('required')">El nombre es requerido</mat-error>
         <mat-error *ngIf="form.get('fullName')?.hasError('maxlength')">Máximo 255 caracteres</mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Correo electrónico</mat-label>
-        <mat-icon matPrefix>email</mat-icon>
-        <input matInput type="email" formControlName="email" placeholder="correo@assistpoint.co" required>
-        <mat-error *ngIf="form.get('email')?.hasError('required')">El correo es requerido</mat-error>
-        <mat-error *ngIf="form.get('email')?.hasError('email')">Ingresa un correo válido</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="fill">
@@ -54,6 +46,24 @@
         <mat-label>Teléfono</mat-label>
         <mat-icon matPrefix>phone</mat-icon>
         <input matInput formControlName="phone" placeholder="+57 300 000 0000">
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>RH / Tipo de sangre</mat-label>
+        <mat-icon matPrefix>bloodtype</mat-icon>
+        <mat-select formControlName="bloodType">
+          <mat-option value="">Sin registrar</mat-option>
+          <mat-option *ngFor="let bloodType of bloodTypes" [value]="bloodType">
+            {{ bloodType }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Contacto de emergencia</mat-label>
+        <mat-icon matPrefix>contact_phone</mat-icon>
+        <input matInput formControlName="emergencyContact" placeholder="Nombre y teléfono">
+        <mat-error *ngIf="form.get('emergencyContact')?.hasError('maxlength')">Máximo 180 caracteres</mat-error>
       </mat-form-field>
     </div>
   </section>
@@ -107,16 +117,6 @@
         <mat-select formControlName="mode">
           <mat-option *ngFor="let mode of modes" [value]="mode">
             {{ mode }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Tipo de persona</mat-label>
-        <mat-icon matPrefix>groups</mat-icon>
-        <mat-select formControlName="personType">
-          <mat-option *ngFor="let type of personTypes" [value]="type">
-            {{ type }}
           </mat-option>
         </mat-select>
       </mat-form-field>

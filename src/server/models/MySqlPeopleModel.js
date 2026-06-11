@@ -33,16 +33,18 @@ class MySqlPeopleModel {
         CREATE TABLE IF NOT EXISTS people (
           id INT NOT NULL AUTO_INCREMENT,
           fullName VARCHAR(160) NOT NULL,
-          email VARCHAR(200) NOT NULL,
+          email VARCHAR(200) NULL,
           documentNumber VARCHAR(80) NOT NULL,
           department VARCHAR(120) NOT NULL,
           role VARCHAR(160) NOT NULL,
           site VARCHAR(80) NOT NULL DEFAULT 'Colina',
           status VARCHAR(40) NOT NULL DEFAULT 'Activo',
           mode VARCHAR(40) NOT NULL DEFAULT 'Presencial',
-          personType VARCHAR(40) NOT NULL DEFAULT 'Empleado',
+          personType VARCHAR(40) NULL,
           employeeCode VARCHAR(80) NULL,
           phone VARCHAR(60) NULL,
+          bloodType VARCHAR(10) NULL,
+          emergencyContact VARCHAR(180) NULL,
           startDate DATE NULL,
           observations TEXT NULL,
           avatar LONGTEXT NOT NULL,
@@ -76,9 +78,11 @@ class MySqlPeopleModel {
     }
 
     const addColumns = [
-      ['personType', "ALTER TABLE people ADD COLUMN personType VARCHAR(40) NOT NULL DEFAULT 'Empleado' AFTER mode"],
+      ['personType', "ALTER TABLE people ADD COLUMN personType VARCHAR(40) NULL AFTER mode"],
       ['employeeCode', "ALTER TABLE people ADD COLUMN employeeCode VARCHAR(80) NULL AFTER personType"],
       ['phone', "ALTER TABLE people ADD COLUMN phone VARCHAR(60) NULL AFTER employeeCode"],
+      ['bloodType', "ALTER TABLE people ADD COLUMN bloodType VARCHAR(10) NULL AFTER phone"],
+      ['emergencyContact', "ALTER TABLE people ADD COLUMN emergencyContact VARCHAR(180) NULL AFTER bloodType"],
       ['startDate', "ALTER TABLE people ADD COLUMN startDate DATE NULL AFTER phone"],
       ['observations', "ALTER TABLE people ADD COLUMN observations TEXT NULL AFTER startDate"]
     ];
@@ -89,6 +93,12 @@ class MySqlPeopleModel {
     await this.addUniqueIndexIfMissing('people', 'ux_people_document', 'documentNumber');
     await this.addUniqueIndexIfMissing('people', 'ux_people_employee_code', 'employeeCode');
 
+    if (columnNames.has('email')) {
+      await this.pool.query('ALTER TABLE people MODIFY email VARCHAR(200) NULL');
+    }
+    if (columnNames.has('personType')) {
+      await this.pool.query('ALTER TABLE people MODIFY personType VARCHAR(40) NULL');
+    }
     await this.pool.query("ALTER TABLE people MODIFY avatar LONGTEXT NOT NULL");
   }
 
@@ -183,12 +193,10 @@ class MySqlPeopleModel {
     const cargos = ['Analista Contable', 'Analista Contable Senior', 'Analista Contable y Reporting', 'Analista de Facturación y Cobros', 'Analista de Marketing Digital', 'Analista de Recursos Humanos', 'Aprendiz Marketing', 'Aprendiz Recursos Humanos', 'Asistente Legal', 'Asistente Médico enfocado en coordinación de Atención al Paciente', 'Asistente Médico con enfoque en ciclo de Facturación', 'Coordinador de Marketing Junior', 'Direccion', 'Director de Recursos Humanos', 'Especialista en Generación de Leads B2B', 'General Manager', 'Gestor Médico con Énfasis Administrativo', 'IT Asistencia Remota Junior', 'Jefe de Contabilidad', 'Manager Contable y Financiero', 'Médico', 'Office and Operations Manager', 'Operaria de Limpieza y Servicios Generales', 'Project Manager', 'Revenue Cycle', 'Servicio de Asistencia Remota'];
     const sedes = [['Colina', '', 'Bogotá'], ['123', '', 'Bogotá'], ['Medellin', '', 'Medellín'], ['Uruguay', '', 'Montevideo']];
     const modalidades = ['Presencial', 'Remoto', 'Híbrido'];
-    const tiposPersona = ['Empleado', 'Contratista', 'Visitante', 'Practicante', 'Proveedor'];
     for (const area of areas) await this.pool.execute('INSERT IGNORE INTO areas (nombre) VALUES (?)', [area]);
     for (const cargo of cargos) await this.pool.execute('INSERT IGNORE INTO cargos (nombre) VALUES (?)', [cargo]);
     for (const sede of sedes) await this.pool.execute('INSERT IGNORE INTO sedes (nombre, direccion, ciudad) VALUES (?, ?, ?)', sede);
     for (const modalidad of modalidades) await this.pool.execute('INSERT IGNORE INTO modalidades (nombre) VALUES (?)', [modalidad]);
-    for (const tipo of tiposPersona) await this.pool.execute('INSERT IGNORE INTO tipos_persona (nombre) VALUES (?)', [tipo]);
   }
 
   async ensureCarnetsSchema() {
@@ -284,16 +292,18 @@ class MySqlPeopleModel {
     const startDate = String(personData.startDate || '').trim();
     return {
       fullName: String(personData.fullName || '').trim(),
-      email: String(personData.email || '').trim(),
+      email: null,
       documentNumber: String(personData.documentNumber || '').trim(),
       department: String(personData.department || '').trim(),
       role: String(personData.role || '').trim(),
       site: String(personData.site || 'Colina').trim(),
       status: status === 'Vacaciones' ? 'Suspendido' : status,
       mode: String(personData.mode || 'Presencial').trim(),
-      personType: String(personData.personType || 'Empleado').trim(),
+      personType: null,
       employeeCode: String(personData.employeeCode || '').trim() || null,
       phone: String(personData.phone || '').trim() || null,
+      bloodType: String(personData.bloodType || '').trim() || null,
+      emergencyContact: String(personData.emergencyContact || '').trim() || null,
       startDate: startDate ? startDate.slice(0, 10) : null,
       observations: String(personData.observations || '').trim() || null,
       avatar: String(personData.avatar || 'img/defecto_perfil.jpeg').trim() || 'img/defecto_perfil.jpeg'
@@ -301,7 +311,7 @@ class MySqlPeopleModel {
   }
 
   validateRequired(person) {
-    const requiredFields = ['fullName', 'email', 'documentNumber', 'department', 'role', 'site'];
+    const requiredFields = ['fullName', 'documentNumber', 'department', 'role', 'site'];
     const missing = requiredFields.filter((field) => !person[field]);
     if (missing.length > 0) {
       throw new Error(`Missing required fields: ${missing.join(', ')}`);
@@ -310,14 +320,14 @@ class MySqlPeopleModel {
 
   async getAll() {
     await this.ready;
-    const [rows] = await this.pool.query('SELECT id, fullName, email, documentNumber, department, role, site, status, mode, personType, employeeCode, phone, startDate, observations, avatar FROM people ORDER BY id DESC');
+    const [rows] = await this.pool.query('SELECT id, fullName, documentNumber, department, role, site, status, mode, employeeCode, phone, bloodType, emergencyContact, startDate, observations, avatar FROM people ORDER BY id DESC');
     return this.attachActiveCarnets(rows);
   }
 
   async getById(id) {
     await this.ready;
     const [rows] = await this.pool.execute(
-      'SELECT id, fullName, email, documentNumber, department, role, site, status, mode, personType, employeeCode, phone, startDate, observations, avatar FROM people WHERE id = ? LIMIT 1',
+      'SELECT id, fullName, documentNumber, department, role, site, status, mode, employeeCode, phone, bloodType, emergencyContact, startDate, observations, avatar FROM people WHERE id = ? LIMIT 1',
       [Number(id)]
     );
     const people = await this.attachActiveCarnets(rows);
@@ -327,7 +337,7 @@ class MySqlPeopleModel {
   async getPublicCardByToken(token) {
     await this.ready;
     const [rows] = await this.pool.execute(
-      `SELECT p.id, p.fullName, p.email, p.documentNumber, p.department, p.role, p.site, p.status, p.mode, p.personType, p.employeeCode, p.phone, p.startDate, p.observations, p.avatar
+      `SELECT p.id, p.fullName, p.documentNumber, p.department, p.role, p.site, p.status, p.mode, p.employeeCode, p.phone, p.bloodType, p.emergencyContact, p.startDate, p.observations, p.avatar
        FROM carnets c
        INNER JOIN people p ON p.id = c.persona_id
        WHERE c.qr_token = ? AND c.estado_carnet = ? AND c.deleted_at IS NULL
@@ -345,14 +355,14 @@ class MySqlPeopleModel {
 
     try {
       const [result] = await this.pool.execute(
-        'INSERT INTO people (fullName, email, documentNumber, department, role, site, status, mode, personType, employeeCode, phone, startDate, observations, avatar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [person.fullName, person.email, person.documentNumber, person.department, person.role, person.site, person.status, person.mode, person.personType, person.employeeCode, person.phone, person.startDate, person.observations, person.avatar]
+        'INSERT INTO people (fullName, email, documentNumber, department, role, site, status, mode, personType, employeeCode, phone, bloodType, emergencyContact, startDate, observations, avatar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [person.fullName, person.email, person.documentNumber, person.department, person.role, person.site, person.status, person.mode, person.personType, person.employeeCode, person.phone, person.bloodType, person.emergencyContact, person.startDate, person.observations, person.avatar]
       );
       await this.generateCarnetForPerson(result.insertId);
       return this.getById(result.insertId);
     } catch (error) {
       if (error && error.code === 'ER_DUP_ENTRY') {
-        throw new Error('Ya existe una persona con el mismo documento, correo o código de empleado');
+        throw new Error('Ya existe una persona con el mismo documento o código de empleado');
       }
       throw error;
     }
@@ -378,7 +388,6 @@ class MySqlPeopleModel {
       } catch (error) {
         skipped.push({
           documentNumber: personData.documentNumber || '',
-          email: personData.email || '',
           error: error.message
         });
       }
@@ -428,13 +437,13 @@ class MySqlPeopleModel {
 
     try {
       await this.pool.execute(
-        'UPDATE people SET fullName = ?, email = ?, documentNumber = ?, department = ?, role = ?, site = ?, status = ?, mode = ?, personType = ?, employeeCode = ?, phone = ?, startDate = ?, observations = ?, avatar = ? WHERE id = ?',
-        [person.fullName, person.email, person.documentNumber, person.department, person.role, person.site, person.status, person.mode, person.personType, person.employeeCode, person.phone, person.startDate, person.observations, person.avatar, Number(id)]
+        'UPDATE people SET fullName = ?, email = ?, documentNumber = ?, department = ?, role = ?, site = ?, status = ?, mode = ?, personType = ?, employeeCode = ?, phone = ?, bloodType = ?, emergencyContact = ?, startDate = ?, observations = ?, avatar = ? WHERE id = ?',
+        [person.fullName, person.email, person.documentNumber, person.department, person.role, person.site, person.status, person.mode, person.personType, person.employeeCode, person.phone, person.bloodType, person.emergencyContact, person.startDate, person.observations, person.avatar, Number(id)]
       );
       return this.getById(id);
     } catch (error) {
       if (error && error.code === 'ER_DUP_ENTRY') {
-        throw new Error('Ya existe una persona con el mismo documento, correo o código de empleado');
+        throw new Error('Ya existe una persona con el mismo documento o código de empleado');
       }
       throw error;
     }
@@ -539,7 +548,8 @@ class MySqlPeopleModel {
       role: person.role,
       site: person.site,
       mode: person.mode,
-      personType: person.personType || 'Empleado',
+      bloodType: person.bloodType || '',
+      emergencyContact: person.emergencyContact || '',
       status: person.status,
       avatar: person.avatar
     };
@@ -551,10 +561,9 @@ class MySqlPeopleModel {
     const [cargos] = await this.pool.query('SELECT id, nombre, area_id, descripcion, activo FROM cargos ORDER BY nombre');
     const [sedes] = await this.pool.query('SELECT id, nombre, direccion, ciudad, activo FROM sedes ORDER BY nombre');
     const [modalidades] = await this.pool.query('SELECT id, nombre, descripcion, activo FROM modalidades ORDER BY nombre');
-    const [tiposPersona] = await this.pool.query('SELECT id, nombre, descripcion, activo FROM tipos_persona ORDER BY nombre');
     const estadosPersona = ['Activo', 'Inactivo', 'Retirado', 'Suspendido'].map((nombre, index) => ({ id: index + 1, nombre, activo: true }));
     const estadosCarnet = ['Vigente', 'Vencido', 'Anulado', 'Extraviado', 'Reemplazado', 'Bloqueado'].map((nombre, index) => ({ id: index + 1, nombre, activo: true }));
-    return { areas, cargos, sedes, modalidades, tiposPersona, estadosPersona, estadosCarnet };
+    return { areas, cargos, sedes, modalidades, estadosPersona, estadosCarnet };
   }
 
   async createCatalogItem(type, payload = {}) {
@@ -585,11 +594,6 @@ class MySqlPeopleModel {
         const [rows] = await this.pool.execute('SELECT id, nombre, descripcion, activo FROM modalidades WHERE nombre = ? LIMIT 1', [nombre]);
         return rows[0];
       }
-      if (type === 'tiposPersona') {
-        await this.pool.execute('INSERT INTO tipos_persona (nombre, descripcion, activo) VALUES (?, ?, 1)', [nombre, String(payload.descripcion || '').trim()]);
-        const [rows] = await this.pool.execute('SELECT id, nombre, descripcion, activo FROM tipos_persona WHERE nombre = ? LIMIT 1', [nombre]);
-        return rows[0];
-      }
     } catch (error) {
       if (error && error.code === 'ER_DUP_ENTRY') {
         throw new Error('Ya existe un elemento con ese nombre');
@@ -613,8 +617,6 @@ class MySqlPeopleModel {
         await this.pool.execute('UPDATE sedes SET nombre = ?, direccion = ?, ciudad = ?, activo = ? WHERE id = ?', [nombre, String(payload.direccion || '').trim(), String(payload.ciudad || '').trim(), payload.activo === false ? 0 : 1, Number(id)]);
       } else if (type === 'modalidades') {
         await this.pool.execute('UPDATE modalidades SET nombre = ?, descripcion = ?, activo = ? WHERE id = ?', [nombre, String(payload.descripcion || '').trim(), payload.activo === false ? 0 : 1, Number(id)]);
-      } else if (type === 'tiposPersona') {
-        await this.pool.execute('UPDATE tipos_persona SET nombre = ?, descripcion = ?, activo = ? WHERE id = ?', [nombre, String(payload.descripcion || '').trim(), payload.activo === false ? 0 : 1, Number(id)]);
       } else {
         throw new Error('Unsupported catalog');
       }
@@ -629,19 +631,20 @@ class MySqlPeopleModel {
     await this.ready;
     const item = await this.getCatalogItem(type, id);
     if (!item) return false;
-    const usageColumn = type === 'areas' ? 'department' : type === 'cargos' ? 'role' : type === 'sedes' ? 'site' : type === 'modalidades' ? 'mode' : 'personType';
+    const usageColumn = type === 'areas' ? 'department' : type === 'cargos' ? 'role' : type === 'sedes' ? 'site' : type === 'modalidades' ? 'mode' : null;
     if (!usageColumn) throw new Error('Unsupported catalog');
     const [usage] = await this.pool.execute(`SELECT COUNT(1) AS total FROM people WHERE ${usageColumn} = ?`, [item.nombre]);
     if (Number(usage[0]?.total || 0) > 0) {
       throw new Error('No se puede eliminar porque está asociado a personas existentes');
     }
-    const table = type === 'areas' ? 'areas' : type === 'cargos' ? 'cargos' : type === 'sedes' ? 'sedes' : type === 'modalidades' ? 'modalidades' : 'tipos_persona';
+    const table = type === 'areas' ? 'areas' : type === 'cargos' ? 'cargos' : type === 'sedes' ? 'sedes' : type === 'modalidades' ? 'modalidades' : null;
+    if (!table) throw new Error('Unsupported catalog');
     const [result] = await this.pool.execute(`DELETE FROM ${table} WHERE id = ?`, [Number(id)]);
     return result.affectedRows > 0;
   }
 
   async getCatalogItem(type, id) {
-    const table = type === 'areas' ? 'areas' : type === 'cargos' ? 'cargos' : type === 'sedes' ? 'sedes' : type === 'modalidades' ? 'modalidades' : type === 'tiposPersona' ? 'tipos_persona' : null;
+    const table = type === 'areas' ? 'areas' : type === 'cargos' ? 'cargos' : type === 'sedes' ? 'sedes' : type === 'modalidades' ? 'modalidades' : null;
     if (!table) throw new Error('Unsupported catalog');
     const [rows] = await this.pool.execute(`SELECT * FROM ${table} WHERE id = ? LIMIT 1`, [Number(id)]);
     return rows[0] || null;

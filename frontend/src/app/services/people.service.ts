@@ -49,15 +49,15 @@ export class PeopleService {
     return firstValueFrom(this.http.get<Catalogs>(`${API_BASE_URL.replace(/\/$/, '')}/catalogs`, { headers: this.headers() }));
   }
 
-  createCatalogItem(type: 'areas' | 'cargos' | 'sedes' | 'modalidades' | 'tiposPersona', item: Record<string, unknown>): Promise<unknown> {
+  createCatalogItem(type: 'areas' | 'cargos' | 'sedes' | 'modalidades', item: Record<string, unknown>): Promise<unknown> {
     return firstValueFrom(this.http.post(`${API_BASE_URL.replace(/\/$/, '')}/catalogs/${type}`, item, { headers: this.headers(true) }));
   }
 
-  updateCatalogItem(type: 'areas' | 'cargos' | 'sedes' | 'modalidades' | 'tiposPersona', id: number, item: Record<string, unknown>): Promise<unknown> {
+  updateCatalogItem(type: 'areas' | 'cargos' | 'sedes' | 'modalidades', id: number, item: Record<string, unknown>): Promise<unknown> {
     return firstValueFrom(this.http.put(`${API_BASE_URL.replace(/\/$/, '')}/catalogs/${type}/${id}`, item, { headers: this.headers(true) }));
   }
 
-  deleteCatalogItem(type: 'areas' | 'cargos' | 'sedes' | 'modalidades' | 'tiposPersona', id: number): Promise<void> {
+  deleteCatalogItem(type: 'areas' | 'cargos' | 'sedes' | 'modalidades', id: number): Promise<void> {
     return firstValueFrom(this.http.delete<void>(`${API_BASE_URL.replace(/\/$/, '')}/catalogs/${type}/${id}`, { headers: this.headers(true) }));
   }
 
@@ -69,8 +69,8 @@ export class PeopleService {
     return firstValueFrom(this.http.get<CarnetValidation>(`${API_BASE_URL.replace(/\/$/, '')}/carnets/validate/${encodeURIComponent(token)}`));
   }
 
-  importPeople(people: PersonFormValue[]): Promise<{ created: Person[]; updated: Person[]; skipped: Array<{ documentNumber: string; email: string; error: string }> }> {
-    return firstValueFrom(this.http.post<{ created: Person[]; updated: Person[]; skipped: Array<{ documentNumber: string; email: string; error: string }> }>(
+  importPeople(people: PersonFormValue[]): Promise<{ created: Person[]; updated: Person[]; skipped: Array<{ documentNumber: string; error: string }> }> {
+    return firstValueFrom(this.http.post<{ created: Person[]; updated: Person[]; skipped: Array<{ documentNumber: string; error: string }> }>(
       `${API_BASE_URL}/people/import`,
       { people },
       { headers: this.headers(true) }

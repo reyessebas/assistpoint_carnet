@@ -123,10 +123,6 @@
           <mat-icon>sync_alt</mat-icon>
           <span>Work Modes</span>
         </button>
-        <button [class.active]="adminSection === 'tiposPersona'" (click)="selectAdminSection('tiposPersona'); closeMobileSidebar()">
-          <mat-icon>groups</mat-icon>
-          <span>Staff Types</span>
-        </button>
       </aside>
 
       <!-- ════ MAIN ════ -->
@@ -240,6 +236,8 @@
                 <th class="col-photo">Photo</th>
                 <th>Staff Member</th>
                 <th class="col-doc">Document</th>
+                <th class="col-rh">RH</th>
+                <th class="col-emergency">Emergency Contact</th>
                 <th class="col-dept">Department</th>
                 <th class="col-site">Location</th>
                 <th>Status</th>
@@ -284,6 +282,12 @@
                     <mat-icon>badge</mat-icon>
                     {{ person.documentNumber }}
                   </div>
+                </td>
+
+                <td data-label="RH" class="col-rh">{{ person.bloodType || 'N/R' }}</td>
+
+                <td data-label="Emergency Contact" class="col-emergency">
+                  {{ person.emergencyContact || 'Not registered' }}
                 </td>
 
                 <td data-label="Department" class="col-dept">{{ person.department }}</td>
