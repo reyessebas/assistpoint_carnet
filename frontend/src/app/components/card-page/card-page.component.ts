@@ -54,8 +54,7 @@ export class CardPageComponent implements OnInit {
 
   get qrUrl(): string {
     if (!this.person) return '';
-    const currentUrl = this.cardUrl;
-    return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(currentUrl)}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(this.validationUrl)}`;
   }
 
   get validationUrl(): string {
@@ -94,7 +93,7 @@ export class CardPageComponent implements OnInit {
     if (!this.person) return;
     const { canvas, ctx } = createCarnetCanvas();
     if (!ctx) return;
-    await drawCarnetToCanvas(ctx, this.person, { cardUrl: this.cardUrl, validationUrl: this.cardUrl });
+    await drawCarnetToCanvas(ctx, this.person, { cardUrl: this.cardUrl, validationUrl: this.validationUrl });
     downloadCanvasPng(canvas, `carnet-${this.person.employeeCode || this.person.documentNumber || this.person.id}`);
   }
 
