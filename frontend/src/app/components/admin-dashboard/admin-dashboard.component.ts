@@ -15,7 +15,7 @@ import { PeopleService } from '../../services/people.service';
 import { resolveAssetUrl } from '../../shared/app-urls';
 import { createCarnetCanvas, downloadCanvasPng, drawCarnetToCanvas } from '../../shared/carnet-canvas';
 
-type CatalogType = 'areas' | 'cargos' | 'sedes' | 'modalidades' | 'tiposPersona';
+type CatalogType = 'areas' | 'cargos' | 'sedes' | 'modalidades';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -114,7 +114,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   async addCatalogItem(type: CatalogType): Promise<void> {
-    const labels = { areas: 'área', cargos: 'cargo', sedes: 'sede', modalidades: 'modalidad', tiposPersona: 'tipo de persona' };
+    const labels = { areas: 'área', cargos: 'cargo', sedes: 'sede', modalidades: 'modalidad' };
     const nombre = prompt(`Nombre de la nueva ${labels[type]}:`);
     if (!nombre?.trim()) return;
 
@@ -170,8 +170,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       areas: 'Áreas',
       cargos: 'Cargos',
       sedes: 'Sedes',
-      modalidades: 'Modalidades',
-      tiposPersona: 'Tipos de persona'
+      modalidades: 'Modalidades'
     };
     return titles[this.catalogView];
   }
@@ -182,7 +181,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       const matchesDept = !this.filterDepartment || person.department === this.filterDepartment;
       const matchesSite = !this.filterSite || person.site === this.filterSite;
       const matchesStatus = !this.filterStatus || person.status === this.filterStatus;
-      const haystack = [person.fullName, person.email, person.documentNumber, person.employeeCode, person.department, person.role, person.site].join(' ').toLowerCase();
+      const haystack = [person.fullName, person.documentNumber, person.employeeCode, person.department, person.role, person.site, person.bloodType, person.emergencyContact].join(' ').toLowerCase();
       const matchesSearch = !search || haystack.includes(search);
       return matchesDept && matchesSite && matchesStatus && matchesSearch;
     });
@@ -376,7 +375,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   private buildPeopleCsv(people: Person[]): string {
-    const headers = ['EMPLEADO ID', 'NOMBRE', 'DOCUMENTO', 'FECHA DE INGRESO', 'ÁREA', 'CARGO', 'CELULAR', 'EMAIL', 'SEDE', 'ESTADO'];
+    const headers = ['EMPLEADO ID', 'NOMBRE', 'DOCUMENTO', 'FECHA DE INGRESO', 'ÁREA', 'CARGO', 'CELULAR', 'RH', 'CONTACTO DE EMERGENCIA', 'SEDE', 'ESTADO'];
     const rows = people.map(person => [
       person.employeeCode || '',
       person.fullName,
@@ -385,7 +384,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       person.department,
       person.role,
       person.phone || '',
-      person.email,
+      person.bloodType || '',
+      person.emergencyContact || '',
       person.site,
       person.status
     ]);
@@ -491,10 +491,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       await this.loadPeople();
       this.showNotice(`Importación lista: ${result.created.length} creadas, ${result.updated.length} actualizadas, ${result.skipped.length} con error u omitidas.`);
       if (result.skipped.length > 0) {
-        this.showError(result.skipped.slice(0, 3).map(item => `${item.documentNumber || item.email}: ${item.error}`).join(' | '), 12000);
+        this.showError(result.skipped.slice(0, 3).map(item => `${item.documentNumber || 'Sin documento'}: ${item.error}`).join(' | '), 12000);
       }
     } catch {
-      this.showError('No se pudo importar el archivo. Revisa que la primera fila tenga encabezados como NOMBRE, DOCUMENTO, EMAIL, ÁREA, CARGO, SEDE y ESTADO.');
+      this.showError('No se pudo importar el archivo. Revisa que la primera fila tenga encabezados como NOMBRE, DOCUMENTO, ÁREA, CARGO, SEDE, RH y CONTACTO DE EMERGENCIA.');
     }
   }
 
@@ -536,18 +536,17 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     const hasHeader = (aliases: string[]) => aliases.some(alias => headers.includes(alias));
     const requiredGroups = [
       ['nombre', 'nombre_completo', 'full_name', 'fullname'],
-      ['documento', 'document_number', 'documentnumber', 'cedula', 'identificacion'],
-      ['email', 'correo', 'correo_electronico']
+      ['documento', 'document_number', 'documentnumber', 'cedula', 'identificacion']
     ];
     const missingRequired = requiredGroups.filter(group => !hasHeader(group));
     if (missingRequired.length > 0) {
-      this.showError('Faltan encabezados requeridos: NOMBRE, DOCUMENTO y EMAIL.');
+      this.showError('Faltan encabezados requeridos: NOMBRE y DOCUMENTO.');
       return [];
     }
 
     return bodyRows
       .map(row => this.mapImportedRow(headers, row))
-      .filter(person => person.fullName && person.documentNumber && person.email);
+      .filter(person => person.fullName && person.documentNumber);
   }
 
   private mapImportedRow(headers: string[], values: Array<string | number | Date | null>): PersonFormValue {
@@ -556,7 +555,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     const pick = (...keys: string[]) => this.cellToString(pickRaw(...keys));
     return {
       fullName: pick('nombre', 'nombre_completo', 'full_name', 'fullname'),
-      email: pick('email', 'correo', 'correo_electronico'),
       documentNumber: pick('documento', 'document_number', 'documentnumber', 'cedula', 'identificacion'),
       employeeCode: pick('empleado_id', 'codigo_empleado', 'codigo', 'employee_code', 'employeeid'),
       department: pick('area', 'departamento', 'department') || 'Sin área',
@@ -564,8 +562,27 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       site: pick('sede', 'site') || 'Colina',
       status: this.normalizeImportedStatus(pick('estado', 'estado_persona', 'status') || 'Activo'),
       mode: pick('modalidad', 'mode') || 'Presencial',
-      personType: pick('tipo_persona', 'tipo', 'person_type') || 'Empleado',
-      phone: pick('celular', 'telefono', 'phone'),
+      phone: pick('celular', 'telefono', 'telefono_celular', 'numero_celular', 'movil', 'phone', 'mobile'),
+      bloodType: pick('rh', 'tipo_sangre', 'tipo_de_sangre', 'blood_type', 'bloodtype'),
+      emergencyContact: pick(
+        'contacto_emergencia',
+        'contacto_de_emergencia',
+        'contacto',
+        'emergencia',
+        'telefono_emergencia',
+        'telefono_de_emergencia',
+        'celular_emergencia',
+        'celular_de_emergencia',
+        'numero_emergencia',
+        'numero_de_emergencia',
+        'numero_contacto_emergencia',
+        'numero_de_contacto_de_emergencia',
+        'contacto_emergency',
+        'emergency_contact',
+        'emergencycontact',
+        'emergency_phone',
+        'emergency_number'
+      ),
       startDate: this.normalizeImportedDate(pickRaw('fecha_ingreso', 'fecha_de_ingreso', 'fecha_ingreso_', 'fecha._ingreso', 'start_date')),
       observations: pick('observaciones', 'observations'),
       avatar: pick('foto_url', 'avatar', 'foto') || 'img/defecto_perfil.jpeg'
@@ -601,6 +618,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   private cellToString(value: unknown): string {
     if (value == null) return '';
     if (value instanceof Date) return value.toISOString().slice(0, 10);
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return Number.isInteger(value) ? value.toFixed(0) : String(value);
+    }
     return String(value).replace(/\s+/g, ' ').trim();
   }
 
@@ -643,7 +663,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       this.showError('Esta persona no tiene un token público de carnet disponible.');
       return;
     }
-    void this.router.navigate(['/card', token]);
+    void this.router.navigate(['/admin/card', token]);
   }
 
   logout(): void {

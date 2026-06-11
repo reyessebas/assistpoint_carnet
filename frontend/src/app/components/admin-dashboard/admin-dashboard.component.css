@@ -575,6 +575,12 @@ td {
 }
 .document-chip mat-icon { font-size: 15px; width: 15px; height: 15px; color: var(--dash-blue); }
 
+.col-rh { white-space: nowrap; }
+.col-emergency {
+  max-width: 190px;
+  line-height: 1.35;
+}
+
 .actions-cell { white-space: nowrap; text-align: right; }
 
 /* Action buttons */
@@ -869,6 +875,7 @@ td {
   }
 
   .col-sel { display: none; }
+  .col-emergency { max-width: none; text-align: right; }
   .actions-cell { justify-content: flex-end; gap: 4px; flex-wrap: wrap; }
   .actions-cell::before { display: none; }
 

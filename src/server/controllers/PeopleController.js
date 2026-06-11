@@ -99,7 +99,7 @@ class PeopleController {
   async exportCsv(request, response) {
     try {
       const people = await this.model.getAll();
-      const headers = ['EMPLEADO ID', 'NOMBRE', 'DOCUMENTO', 'FECHA DE INGRESO', 'ÁREA', 'CARGO', 'CELULAR', 'EMAIL', 'SEDE', 'ESTADO'];
+      const headers = ['EMPLEADO ID', 'NOMBRE', 'DOCUMENTO', 'FECHA DE INGRESO', 'ÁREA', 'CARGO', 'CELULAR', 'RH', 'CONTACTO DE EMERGENCIA', 'SEDE', 'ESTADO'];
       const rows = people.map((person) => [
         person.employeeCode || '',
         person.fullName,
@@ -108,7 +108,8 @@ class PeopleController {
         person.department,
         person.role,
         person.phone || '',
-        person.email,
+        person.bloodType || '',
+        person.emergencyContact || '',
         person.site,
         person.status
       ]);
@@ -160,7 +161,6 @@ class PeopleController {
         } else {
           skipped.push({
             documentNumber: item.documentNumber || '',
-            email: item.email || '',
             error: errors.join('; ')
           });
         }

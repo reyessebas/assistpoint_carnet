@@ -26,13 +26,6 @@
         <small>Copiar enlace público</small>
       </span>
     </button>
-    <button class="card-actions__item" *ngIf="person" (click)="sendByEmail()">
-      <span class="card-actions__icon"><mat-icon>mail</mat-icon></span>
-      <span>
-        <strong>Enviar por correo</strong>
-        <small>Compartir con otra persona</small>
-      </span>
-    </button>
     <button class="card-actions__item" *ngIf="person" (click)="openValidation()">
       <span class="card-actions__icon"><mat-icon>qr_code_scanner</mat-icon></span>
       <span>
@@ -95,9 +88,9 @@
             <strong>{{ person.documentNumber }}</strong>
           </div>
           <div>
-            <mat-icon>email</mat-icon>
-            <span>Correo:</span>
-            <strong>{{ person.email }}</strong>
+            <mat-icon>bloodtype</mat-icon>
+            <span>RH:</span>
+            <strong>{{ person.bloodType || 'No registrado' }}</strong>
           </div>
           <div>
             <mat-icon>location_on</mat-icon>
@@ -110,9 +103,9 @@
             <strong>{{ person.mode }}</strong>
           </div>
           <div>
-            <mat-icon>groups</mat-icon>
-            <span>Tipo:</span>
-            <strong>{{ person.personType || 'Empleado' }}</strong>
+            <mat-icon>contact_phone</mat-icon>
+            <span>Emergencia:</span>
+            <strong>{{ person.emergencyContact || 'No registrado' }}</strong>
           </div>
         </div>
 

@@ -1,16 +1,16 @@
 export interface Person {
   id: number;
   fullName: string;
-  email: string;
   documentNumber: string;
   department: string;
   role: string;
   site: string;
   status: 'Activo' | 'Inactivo' | 'Retirado' | 'Suspendido' | string;
   mode: 'Presencial' | 'Remoto' | 'Híbrido' | string;
-  personType?: string;
   employeeCode?: string;
   phone?: string;
+  bloodType?: string;
+  emergencyContact?: string;
   startDate?: string;
   observations?: string;
   avatar: string;
@@ -51,7 +51,6 @@ export interface Catalogs {
   cargos: CatalogItem[];
   sedes: SedeCatalogItem[];
   modalidades: CatalogItem[];
-  tiposPersona: CatalogItem[];
   estadosPersona: CatalogItem[];
   estadosCarnet: CatalogItem[];
 }
@@ -67,7 +66,8 @@ export interface CarnetValidation {
     role: string;
     site: string;
     mode: string;
-    personType: string;
+    bloodType: string;
+    emergencyContact: string;
     status: string;
     avatar: string;
   } | null;
@@ -75,16 +75,16 @@ export interface CarnetValidation {
 
 export interface PersonFormValue {
   fullName: string;
-  email: string;
   documentNumber: string;
   department: string;
   role: string;
   site: string;
   status: string;
   mode: string;
-  personType?: string;
   employeeCode?: string;
   phone?: string;
+  bloodType?: string;
+  emergencyContact?: string;
   startDate?: string;
   observations?: string;
   avatar: string;

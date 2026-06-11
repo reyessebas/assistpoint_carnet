@@ -106,10 +106,10 @@ export async function drawCarnetToCanvas(
   const details = [
     ['area', 'Área:', person.department],
     ['badge', 'Documento:', person.documentNumber],
-    ['mail', 'Correo:', person.email],
+    ['blood', 'RH:', person.bloodType || 'No registrado'],
     ['pin', 'Sede:', person.site || 'Colina'],
     ['mode', 'Modalidad:', person.mode],
-    ['type', 'Tipo:', person.personType || 'Empleado']
+    ['phone', 'Emergencia:', person.emergencyContact || 'No registrado']
   ];
   const detailsY = dividerY + 26;
   details.forEach(([icon, label, value], index) => {

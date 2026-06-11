@@ -85,7 +85,7 @@ export class PersonFormDialogComponent implements OnInit {
   ];
   sites = ['Colina', '123', 'Medellin', 'Uruguay'];
   modes = ['Presencial', 'Remoto', 'Híbrido'];
-  personTypes = ['Empleado', 'Contratista', 'Visitante', 'Practicante', 'Proveedor'];
+  bloodTypes = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
   personStatuses = ['Activo', 'Inactivo', 'Retirado', 'Suspendido'];
 
   constructor(
@@ -97,16 +97,16 @@ export class PersonFormDialogComponent implements OnInit {
     const p = data.person;
     this.form = this.fb.group({
       fullName: [p?.fullName ?? '', [Validators.required, Validators.maxLength(255)]],
-      email: [p?.email ?? '', [Validators.required, Validators.email, Validators.maxLength(200)]],
       documentNumber: [p?.documentNumber ?? '', [Validators.required, Validators.maxLength(80)]],
       department: [p?.department ?? '', [Validators.required, Validators.maxLength(120)]],
       role: [p?.role ?? '', [Validators.required, Validators.maxLength(160)]],
       site: [p?.site ?? 'Colina', [Validators.required, Validators.maxLength(80)]],
       status: [p?.status ?? 'Activo', Validators.required],
       mode: [p?.mode ?? 'Presencial', Validators.required],
-      personType: [p?.personType ?? 'Empleado', Validators.required],
       employeeCode: [p?.employeeCode ?? '', Validators.maxLength(80)],
       phone: [p?.phone ?? '', Validators.maxLength(60)],
+      bloodType: [p?.bloodType ?? '', Validators.maxLength(10)],
+      emergencyContact: [p?.emergencyContact ?? '', Validators.maxLength(180)],
       startDate: [this.formatDateForInput(p?.startDate) ?? ''],
       avatar: [p?.avatar ?? '']
     });
@@ -120,7 +120,6 @@ export class PersonFormDialogComponent implements OnInit {
       this.roles = catalogs.cargos.filter(item => item.activo).map(item => item.nombre);
       this.sites = catalogs.sedes.filter(item => item.activo).map(item => item.nombre);
       this.modes = catalogs.modalidades.filter(item => item.activo).map(item => item.nombre);
-      this.personTypes = catalogs.tiposPersona.filter(item => item.activo).map(item => item.nombre);
       this.personStatuses = catalogs.estadosPersona.filter(item => item.activo).map(item => item.nombre);
     } catch {
       // Keep local fallbacks when catalogs are unavailable.
