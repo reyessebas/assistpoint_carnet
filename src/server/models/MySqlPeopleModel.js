@@ -121,6 +121,10 @@ class MySqlPeopleModel {
     return `${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/card/${encodeURIComponent(token)}`;
   }
 
+  validationUrl(token) {
+    return `${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/validar-carnet/${encodeURIComponent(token)}`;
+  }
+
   async ensureCatalogsSchema() {
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS areas (
@@ -236,7 +240,7 @@ class MySqlPeopleModel {
       const token = this.generateShareToken();
       await this.pool.execute(
         'INSERT INTO carnets (persona_id, codigo_carnet, qr_token, qr_url, version) VALUES (?, ?, ?, ?, 1)',
-        [person.id, `AP-${String(person.id).padStart(4, '0')}-V1`, token, this.publicCardUrl(token)]
+        [person.id, `AP-${String(person.id).padStart(4, '0')}-V1`, token, this.validationUrl(token)]
       );
     }
   }
@@ -261,7 +265,7 @@ class MySqlPeopleModel {
           const token = this.generateShareToken();
           await this.pool.execute('UPDATE carnets SET qr_token = ?, qr_url = ?, updated_at = NOW() WHERE id = ?', [
             token,
-            this.publicCardUrl(token),
+            this.validationUrl(token),
             Number(carnet.id)
           ]);
           saved = true;
@@ -273,8 +277,8 @@ class MySqlPeopleModel {
     }
 
     await this.pool.execute(
-      "UPDATE carnets SET qr_url = CONCAT(?, qr_token), updated_at = NOW() WHERE qr_token IS NOT NULL AND qr_token <> '' AND (qr_url IS NULL OR qr_url = '' OR qr_url NOT LIKE '%/card/%')",
-      [`${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/card/`]
+      "UPDATE carnets SET qr_url = CONCAT(?, qr_token), updated_at = NOW() WHERE qr_token IS NOT NULL AND qr_token <> '' AND (qr_url IS NULL OR qr_url = '' OR qr_url NOT LIKE '%/validar-carnet/%')",
+      [`${String(config.PUBLIC_APP_URL).replace(/\/$/, '')}/validar-carnet/`]
     );
 
     await this.addUniqueIndexIfMissing('carnets', 'ux_carnets_token', 'qr_token');
@@ -501,7 +505,7 @@ class MySqlPeopleModel {
     const [versionRows] = await this.pool.execute('SELECT COALESCE(MAX(version), 0) + 1 AS nextVersion FROM carnets WHERE persona_id = ?', [Number(personId)]);
     const version = Number(versionRows[0]?.nextVersion || 1);
     const token = this.generateShareToken();
-    const qrUrl = this.publicCardUrl(token);
+    const qrUrl = this.validationUrl(token);
     const code = `AP-${String(personId).padStart(4, '0')}-V${version}`;
     const [result] = await this.pool.execute(
       'INSERT INTO carnets (persona_id, codigo_carnet, qr_token, qr_url, version) VALUES (?, ?, ?, ?, ?)',

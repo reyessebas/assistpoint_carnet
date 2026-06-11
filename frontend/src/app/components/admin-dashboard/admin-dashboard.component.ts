@@ -436,7 +436,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     const { canvas, ctx } = createCarnetCanvas();
     if (!ctx) return;
     const publicCardUrl = this.cardUrlFor(person);
-    await drawCarnetToCanvas(ctx, person, { cardUrl: publicCardUrl, validationUrl: publicCardUrl });
+    await drawCarnetToCanvas(ctx, person, { cardUrl: publicCardUrl, validationUrl: this.validationUrlFor(person) });
     downloadCanvasPng(canvas, `${filenameBase}_${new Date().toISOString().slice(0, 10)}`);
   }
 
