@@ -19,6 +19,9 @@ const logger = require('./utils/logger');
 // DB initializer
 const initDb = require('./utils/initDb');
 
+// Admin user initializer
+const initAdmin = require('./utils/initAdmin');
+
 // Modelos
 const MySqlPeopleModel = require('./models/MySqlPeopleModel');
 
@@ -172,6 +175,16 @@ async function start() {
       logger.info('✅ Database schema ready.');
     } catch (err) {
       logger.error('❌ Database initialization failed', err);
+      process.exit(1);
+    }
+
+    // Ensure admin user exists with known credentials
+    logger.info('👤 Initializing admin user...');
+    try {
+      await initAdmin();
+      logger.info('✅ Admin user ready.');
+    } catch (err) {
+      logger.error('❌ Admin user initialization failed', err);
       process.exit(1);
     }
 
